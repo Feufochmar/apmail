@@ -154,14 +154,15 @@ li.actor-display {
   background-color: hsl(240, 10%, 75%);
 }
 
-article.activity:after {
-  content: "";
+article.activity {
   display: block;
   border-style: solid;
   border-width: thin;
+  border-radius: 0.5em;
   margin: 0;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  padding: 0.5em;
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
 }
 
 section.actor-display {
@@ -184,8 +185,8 @@ section.activity-object-field:after {
   border-style: dotted;
   border-width: thin;
   margin: 0;
-  margin-top: 0.2em;
-  margin-bottom: 0.2em;
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
 }
 
 section.activity-object-content {
