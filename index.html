@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AP.Mail</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link href="apmail.css" rel="stylesheet" type="text/css" media="all" />
+    <script src="render.js"></script>
+  </head>
+  <body onload="UI.checkConnection()">
+    <nav id="tab-bar" style="visibility:hidden;">
+      <!-- Profile page tab -->
+      <input type="radio" id="profile-selector" class="page" name="page" value="profile" checked onchange="UI.showPage('profile')" />
+      <label for="profile-selector" class="page-label" id="profile-selector-label">Profile</label>
+      <!-- Send page tab -->
+      <input type="radio" id="send-selector" class="page" name="page" value="send" checked onchange="UI.showPage('send')" />
+      <label for="send-selector" class="page-label" id="send-selector-label">Send Message</label>
+      <!-- Inbox tab -->
+      <input type="radio" id="inbox-selector" class="page" name="page" value="inbox" onchange="UI.showPage('inbox')" />
+      <label for="inbox-selector" class="page-label" id="inbox-selector-label">Inbox</label>
+      <!-- Outbox tab -->
+      <input type="radio" id="outbox-selector" class="page" name="page" value="outbox" onchange="UI.showPage('outbox')" />
+      <label for="outbox-selector" class="page-label" id="outbox-selector-label">Outbox</label>
+      <!-- Lookup user tab -->
+      <input type="radio" id="lookup-selector" class="page" name="page" value="lookup" onchange="UI.showPage('lookup')" />
+      <label for="lookup-selector" class="page-label" id="lookup-selector-label">Lookup User</label>
+      <!-- Disconnection -->
+      <input type="radio" id="disconnect-selector" class="page" name="page" value="disconnect" onchange="UI.showPage('select-user')" />
+      <label for="disconnect-selector" class="page-label" id="disconnect-selector-label">Disconnection</label>
+    </nav>
+    <!-- Connection pages -->
+    <main id="select-user">
+      <h2>Connection</h2>
+      Indicate the account to connect to. <br/>
+      <input id="connect-username" type="text" placeholder="user@server" pattern=".*@.*" required /><br/>
+      <button onclick="UI.selectUser()">Next</button>
+      <section id="select-user-error"></section>
+    </main>
+    <main id="ask-password" style="display:none;">
+      <h2>Password</h2>
+      <section id="ask-password-user-info"></section>
+      Enter the password for this account. <br/>
+      <input id="connect-password" type="password" placeholder="password" /><br/>
+      <button onclick="UI.showPage('select-user')">Back</button>
+      <button onclick="UI.connectUser()">Connect</button>
+      <section id="ask-password-error"></section>
+    </main>
+    <!-- Profile page -->
+    <main id="profile" style="display:none;">
+      <section id="profile-info"></section>
+    </main>
+    <!-- Send message page -->
+    <main id="send" style="display:none;">
+      <h4>Audiance</h4>
+      <label for="send-message-public-visibility">General visibility</label>
+      <select id="send-message-public-visibility" onchange="UI.updateSendVisibility()">
+        <option value="to">Public (to), displayed in local/global timelines</option>
+        <option value="cc">Public (cc), hidden from local/global timelines</option>
+        <option value="non">Not public</option>
+      </select><br/>
+      <label for="send-message-follower-visibility">Follower's visibility</label>
+      <select id="send-message-follower-visibility" onchange="UI.updateSendVisibility()">
+        <option value="to">Public (to)</option>
+        <option value="cc">Public (cc)</option>
+        <option value="non">Not sent to followers</option>
+      </select><br/>
+      <label for="send-message-to-recipient">To</label>
+      <ul id="send-message-to" class="recipient-list"></ul>
+      <input id="send-message-to-recipient" type="text" placeholder="user@instance" size="40" />
+      <button onclick="UI.addToRecipient()">Add</button><br/>
+      <label for="send-message-cc-recipient">Cc</label>
+      <ul id="send-message-cc" class="recipient-list"></ul>
+      <input id="send-message-cc-recipient" type="text" placeholder="user@instance" size="40" />
+      <button onclick="UI.addCcRecipient()">Add</button><br/>
+      <section id="send-message-recipient-error"></section>
+      <hr/>
+      <h4>Message</h4>
+      <input id="send-message-subject" type="text" onchange="UI.updateSendContent()" size="80" placeholder="Subject (optional)"/> <br/>
+      <textarea id="send-message-content" rows="20" cols="80" placeholder="What do you want to say ?" onchange="UI.updateSendContent()"></textarea> <br/>
+      <button onclick="UI.sendMessage()">Send</button>
+      <section id="send-error"></section>
+    </main>
+    <!-- Inbox page -->
+    <main id="inbox" style="display:none;">
+      <section id="inbox-messages"></section>
+      <section id="inbox-messages-error"></section>
+    </main>
+    <!-- Outbox page -->
+    <main id="outbox" style="display:none;">
+      <section id="outbox-messages"></section>
+      <section id="outbox-messages-error"></section>
+    </main>
+    <!-- Lookup page -->
+    <main id="lookup" style="display:none;">
+      <input id="lookup-user" type="text" placeholder="user@instance"/> <button onclick="UI.lookupUser()">Lookup user</button> <br/><hr/>
+      <section id="lookup-user-error"></section>
+      <section id="lookup-user-info"></section><hr/>
+      <section id="lookup-user-timeline"></section>
+      <section id="lookup-user-timeline-error"></section>
+    </main>
+  </body>
+</html>

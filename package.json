@@ -1,0 +1,11 @@
+{
+  "name": "apmail",
+  "version": "1.0.0",
+  "description": "An ActivityPub Client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Feufochmar",
+  "license": "ISC"
+}
