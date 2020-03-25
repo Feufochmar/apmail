@@ -62,12 +62,14 @@ var UI = {
     },
     'inbox': function() {
       UI.showPageTab(true)
-      Elem('inbox-messages-error').innerHTML = 'Loading inbox...'
+      Elem('inbox-messages-error').innerHTML = ''
+      Elem('inbox-messages').innerHTML = 'Loading inbox...'
       UI.showTimeline('inbox-messages', ConnectedUser.tokens.user.access_token, ConnectedUser.actor.urls.inbox)
     },
     'outbox': function() {
       UI.showPageTab(true)
-      Elem('outbox-messages-error').innerHTML = 'Loading outbox...'
+      Elem('outbox-messages-error').innerHTML = ''
+      Elem('outbox-messages').innerHTML = 'Loading outbox...'
       UI.showTimeline('outbox-messages', ConnectedUser.tokens.user.access_token, ConnectedUser.actor.urls.outbox)
     },
     'lookup': function() {
