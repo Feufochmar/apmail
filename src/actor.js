@@ -30,6 +30,7 @@ Actor.prototype = {
   server: undefined,
   info: undefined,
   urls: undefined,
+  raw: undefined,
   valid: false,
   // Methods
   // Load from name@server.
@@ -82,6 +83,7 @@ Actor.prototype = {
       if (request.readyState == 4 && request.status == 200) {
         var answer = JSON.parse(request.responseText)
         if (answer && this.isExpectedActorType(answer.type)) {
+          this.raw = answer
           // name and server are previously filled if called from loadFromNameAndServer
           if (!this.name) {
             this.name = answer.preferredUsername
@@ -89,8 +91,12 @@ Actor.prototype = {
           if (!this.server) {
             this.server = profile_url.replace('http://', '').replace('https://', '').split(/[/?#]/)[0]
           }
-          this.info.display_name = answer.name
-          this.info.summary = answer.summary
+          if (answer.name) {
+            this.info.display_name = answer.name
+          } else {
+            this.info.display_name = this.name
+          }
+          this.info.summary = answer.summary ? answer.summary : ""
           this.info.icon = answer.icon ? answer.icon.url : undefined
           this.info.type = answer.type
           this.urls.outbox = answer.outbox

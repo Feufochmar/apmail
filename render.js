@@ -3,23 +3,16 @@ const {Timeline} = require('./src/timeline.js')
 const {Message} = require('./src/message.js')
 const {ConnectedUser} = require('./src/connected-user.js')
 
+// For access of elements
+var Elem = function(id) {
+  return window.document.getElementById(id)
+}
+
 // UI actions
 var UI = {
   // Attributes
   composed_message: new Message(),
   // Methods
-  // Get the value of an element
-  getValue: function(id) {
-    return window.document.getElementById(id).value
-  },
-  // Set the value of an element
-  setValue: function(id, val) {
-    window.document.getElementById(id).value = val
-  },
-  // Clear the value of an element
-  clearValue: function(id) {
-    UI.setValue(id, '')
-  },
   // Actor display
   renderActorTag: function(actor) {
     var display = '<section class="actor-display">'
@@ -44,19 +37,19 @@ var UI = {
   },
   // Show the page tab
   showPageTab: function(is_shown) {
-    window.document.getElementById('tab-bar').style.visibility = is_shown ? 'visible' : 'hidden'
+    Elem('tab-bar').style.visibility = is_shown ? 'visible' : 'hidden'
   },
   // Action done when refreshing a page
   refreshPage: {
     'select-user': function() {
       UI.showPageTab(false)
       ConnectedUser.disconnect()
-      UI.clearValue('connect-username')
+      Elem('connect-username').value = ''
     },
     'ask-password': function() {
       UI.showPageTab(false)
-      UI.clearValue('connect-password')
-      window.document.getElementById('ask-password-user-info').innerHTML = UI.renderActorTag(ConnectedUser.actor)
+      Elem('connect-password').value = ''
+      Elem('ask-password-user-info').innerHTML = UI.renderActorTag(ConnectedUser.actor)
     },
     'profile': function() {
       UI.showPageTab(true)
@@ -69,26 +62,26 @@ var UI = {
     },
     'inbox': function() {
       UI.showPageTab(true)
-      window.document.getElementById('inbox-messages-error').innerHTML = 'Loading inbox...'
+      Elem('inbox-messages-error').innerHTML = 'Loading inbox...'
       UI.showTimeline('inbox-messages', ConnectedUser.tokens.user.access_token, ConnectedUser.actor.urls.inbox)
     },
     'outbox': function() {
       UI.showPageTab(true)
-      window.document.getElementById('outbox-messages-error').innerHTML = 'Loading outbox...'
+      Elem('outbox-messages-error').innerHTML = 'Loading outbox...'
       UI.showTimeline('outbox-messages', ConnectedUser.tokens.user.access_token, ConnectedUser.actor.urls.outbox)
     },
     'lookup': function() {
       UI.showPageTab(true)
-      window.document.getElementById('lookup-user-error').innerHTML = ''
-      window.document.getElementById('lookup-user-info').innerHTML = ''
-      window.document.getElementById('lookup-user-timeline').innerHTML = ''
-      window.document.getElementById('lookup-user-timeline-error').innerHTML = ''
+      Elem('lookup-user-error').innerHTML = ''
+      Elem('lookup-user-info').innerHTML = ''
+      Elem('lookup-user-timeline').innerHTML = ''
+      Elem('lookup-user-timeline-error').innerHTML = ''
     }
   },
   // Show a given page
   showPage: function(page) {
-    ['select-user', 'ask-password', 'profile', 'send', 'inbox', 'outbox', 'lookup'].map(x => window.document.getElementById(x).style.display = 'none')
-    window.document.getElementById(page).style.display = 'block'
+    ['select-user', 'ask-password', 'profile', 'send', 'inbox', 'outbox', 'lookup'].map(x => Elem(x).style.display = 'none')
+    Elem(page).style.display = 'block'
     UI.refreshPage[page]()
   },
   // When the page loads, load the connected user if already connected
@@ -116,7 +109,7 @@ var UI = {
   // When the user enter its address, load the actor representing the user
   selectUser: function() {
     // Get the user name and server name
-    var names = UI.getUserAndServer(window.document.getElementById('connect-username').value)
+    var names = UI.getUserAndServer(Elem('connect-username').value)
     // Load the actor and go to the ask-password page
     ConnectedUser.actor.loadFromNameAndServer(
       names.user, names.server,
@@ -124,7 +117,7 @@ var UI = {
         if (load_ok) {
           UI.showPage('ask-password')
         } else {
-          window.document.getElementById('select-user-error').innerText = 'Error: ' + failure_message
+          Elem('select-user-error').innerText = 'Error: ' + failure_message
         }
       })
   },
@@ -132,47 +125,47 @@ var UI = {
   connectUser: function() {
     // Connect the user and go to the send page
     ConnectedUser.connect(
-      UI.getValue('connect-password'),
+      Elem('connect-password').value,
       function(load_ok, failure_message) {
         if (load_ok) {
           UI.showPage('send')
         } else {
-          window.document.getElementById('ask-password-error').innerText = 'Error: ' + failure_message
+          Elem('ask-password-error').innerText = 'Error: ' + failure_message
         }
       })
   },
   updateProfilePage: function() {
-    window.document.getElementById('profile-info').innerHTML = UI.renderActor(ConnectedUser.actor)
+    Elem('profile-info').innerHTML = UI.renderActor(ConnectedUser.actor)
   },
   updateSendMessagePage: function() {
-    UI.clearValue('send-message-to-recipient')
-    UI.clearValue('send-message-cc-recipient')
-    UI.setValue('send-message-public-visibility', UI.composed_message.public_visibility)
-    UI.setValue('send-message-follower-visibility', UI.composed_message.follower_visibility)
-    UI.setValue('send-message-subject', UI.composed_message.subject)
-    UI.setValue('send-message-content', UI.composed_message.content)
+    Elem('send-message-to-recipient').value = ''
+    Elem('send-message-cc-recipient').value = ''
+    Elem('send-message-public-visibility').value = UI.composed_message.public_visibility
+    Elem('send-message-follower-visibility').value = UI.composed_message.follower_visibility
+    Elem('send-message-subject').value = UI.composed_message.subject
+    Elem('send-message-content').value = UI.composed_message.content
     // TO/CC
-    window.document.getElementById('send-message-to').innerHTML = UI.composed_message.to.map(
+    Elem('send-message-to').innerHTML = UI.composed_message.to.map(
       function(element) {
         return '<li class="actor-display">' + UI.renderActorTag(element) + ' <button onclick="UI.removeToRecipient(\'' + element.urls.profile + '\')">×</button></li>'
       }).join('')
-    window.document.getElementById('send-message-cc').innerHTML = UI.composed_message.cc.map(
+    Elem('send-message-cc').innerHTML = UI.composed_message.cc.map(
       function(element) {
         return '<li class="actor-display">' + UI.renderActorTag(element) + ' <button onclick="UI.removeCcRecipient(\'' + element.urls.profile + '\')">×</button></li>'
       }).join('')
     // Errors
-    window.document.getElementById('send-message-recipient-error').innerHTML = ''
-    window.document.getElementById('send-error').innerHTML = ''
+    Elem('send-message-recipient-error').innerHTML = ''
+    Elem('send-error').innerHTML = ''
   },
   updateSendVisibility: function() {
-    UI.composed_message.setVisibility(UI.getValue('send-message-public-visibility'), UI.getValue('send-message-follower-visibility'))
+    UI.composed_message.setVisibility(Elem('send-message-public-visibility').value, Elem('send-message-follower-visibility').value)
   },
   updateSendContent: function() {
-    UI.composed_message.setContent(UI.getValue('send-message-subject'), UI.getValue('send-message-content'))
+    UI.composed_message.setContent(Elem('send-message-subject').value, Elem('send-message-content').value)
   },
   // Add to recipient lists
   addToRecipient: function() {
-    var names = UI.getUserAndServer(window.document.getElementById('send-message-to-recipient').value)
+    var names = UI.getUserAndServer(Elem('send-message-to-recipient').value)
     var actor = new Actor()
     actor.loadFromNameAndServer(
       names.user, names.server,
@@ -181,12 +174,12 @@ var UI = {
           UI.composed_message.addToRecipient(actor)
           UI.updateSendMessagePage()
         } else {
-          window.document.getElementById('send-message-recipient-error').innerHTML = 'Unable to find user (' + failure_message + ')'
+          Elem('send-message-recipient-error').innerHTML = 'Unable to find user (' + failure_message + ')'
         }
       })
   },
   addCcRecipient: function() {
-    var names = UI.getUserAndServer(window.document.getElementById('send-message-cc-recipient').value)
+    var names = UI.getUserAndServer(Elem('send-message-cc-recipient').value)
     var actor = new Actor()
     actor.loadFromNameAndServer(
       names.user, names.server,
@@ -195,7 +188,7 @@ var UI = {
           UI.composed_message.addCcRecipient(actor)
           UI.updateSendMessagePage()
         } else {
-          window.document.getElementById('send-message-recipient-error').innerHTML = 'Unable to find user (' + failure_message + ')'
+          Elem('send-message-recipient-error').innerHTML = 'Unable to find user (' + failure_message + ')'
         }
       })
   },
@@ -222,12 +215,12 @@ var UI = {
         if (is_ok) {
           UI.showPage('send')
         } else {
-          window.document.getElementById('send-error').innerText = failure_message
+          Elem('send-error').innerText = failure_message
         }
       })
   },
-  renderRawActivity: function(activity) {
-    var str_activity = JSON.stringify(activity.raw, null, 1)
+  renderRawData: function(rawData) {
+    var str_data = JSON.stringify(rawData, null, 1)
     var replace_map = {
       '&': '&amp;',
       '<': '&lt;',
@@ -235,11 +228,11 @@ var UI = {
       '"': '&quot;',
       '\'': '&#039;'
     }
-    str_activity = str_activity.replace(/[&<>"']/g, x => replace_map[x])
-    return '<section class="activity-raw"><details>'
-      + '<summary>Raw activity</summary>'
-      + '<textarea rows="30" cols="120" readonly>' + str_activity + '</textarea>'
-      + '</details></section>'
+    str_data = str_data.replace(/[&<>"']/g, x => replace_map[x])
+    return '<section class="data-raw"><details>'
+    + '<summary>Raw data</summary>'
+    + '<textarea rows="30" cols="120" readonly>' + str_data + '</textarea>'
+    + '</details></section>'
   },
   renderObject: {
     'Note': function(activity) {
@@ -250,7 +243,7 @@ var UI = {
         + '<section class="activity-object-field"> Cc ' + (activity.cc ? activity.cc.map(x => UI.renderActorTag(x)).join(' ') : '' ) + '</section>'
         + '<section class="activity-object-field">Subject: ' + (activity.object.summary ? activity.object.summary : '' ) + '</section>'
         + '<section class="activity-object-field activity-object-content">' + (activity.object.content ? activity.object.content : '' ) + '</section>'
-        + UI.renderRawActivity(activity)
+        + UI.renderRawData(activity.raw)
         + '</article>'
     }
   },
@@ -261,7 +254,7 @@ var UI = {
       } else {
         return '<article class="activity create">'
           + 'Object creation (' + activity.object.type + ').'
-          + UI.renderRawActivity(activity)
+          + UI.renderRawData(activity.raw)
           + '</article>'
       }
     },
@@ -270,7 +263,7 @@ var UI = {
         + (activity.actor ? UI.renderActorTag(activity.actor) : '')
         + " liked "
         + (activity.object ? '<a href="' + activity.object + '">' + activity.object + '</a>' : '')
-        + UI.renderRawActivity(activity)
+        + UI.renderRawData(activity.raw)
         + '</article>'
     },
     'Announce': function(activity) {
@@ -278,14 +271,14 @@ var UI = {
         + (activity.actor ? UI.renderActorTag(activity.actor) : '')
         + " shared "
         + (activity.object ? '<a href="' + activity.object + '">' + activity.object + '</a>' : '')
-        + UI.renderRawActivity(activity)
+        + UI.renderRawData(activity.raw)
         + '</article>'
     },
     'Delete': function(activity) {
       return '<article class="activity delete">'
         + (activity.actor ? UI.renderActorTag(activity.actor) : '')
         + " deleted an object."
-        + UI.renderRawActivity(activity)
+        + UI.renderRawData(activity.raw)
         + '</article>'
     }
   },
@@ -312,9 +305,9 @@ var UI = {
           content = content + '<button onclick="UI.showTimeline(\'' + id + '\',' + (token ? '\'' + token + '\'' : 'undefined') + ',\'' + timeline.next + '\')">Next</button>'
         }
         content = content + '</section>'
-        window.document.getElementById(id).innerHTML = content
+        Elem(id).innerHTML = content
       } else {
-        window.document.getElementById(id + '-error').innerText = failure_message
+        Elem(id + '-error').innerText = failure_message
       }
     })
   },
@@ -338,23 +331,30 @@ var UI = {
       + '</a></p>'
     }
     display = display + '</section>'
+    if (actor.valid) {
+      display = display + UI.renderRawData(actor.raw)
+    }
     return display
   },
   lookupUser: function() {
-    window.document.getElementById('lookup-user-info').innerHTML = ''
-    window.document.getElementById('lookup-user-timeline').innerHTML = ''
-    window.document.getElementById('lookup-user-error').innerHTML = ''
-    window.document.getElementById('lookup-user-timeline-error').innerHTML = ''
-    var names = UI.getUserAndServer(window.document.getElementById('lookup-user').value)
+    Elem('lookup-user-info').innerHTML = ''
+    Elem('lookup-user-timeline').innerHTML = ''
+    Elem('lookup-user-error').innerHTML = ''
+    Elem('lookup-user-timeline-error').innerHTML = ''
+    var names = UI.getUserAndServer(Elem('lookup-user').value)
     var actor = new Actor()
     actor.loadFromNameAndServer(
       names.user, names.server,
       function(load_ok, failure_message) {
         if (load_ok) {
-          window.document.getElementById('lookup-user-info').innerHTML = UI.renderActor(actor)
-          UI.showTimeline('lookup-user-timeline', undefined, actor.urls.outbox)
+          Elem('lookup-user-info').innerHTML = UI.renderActor(actor)
+          if (actor.urls.outbox) {
+            UI.showTimeline('lookup-user-timeline', undefined, actor.urls.outbox)
+          } else {
+            Elem('lookup-user-timeline-error').innerText = 'User does not have a public outbox.'
+          }
         } else {
-          window.document.getElementById('lookup-user-error').innerHTML = 'Unable to find user (' + failure_message + ')'
+          Elem('lookup-user-error').innerText = 'Unable to find user (' + failure_message + ')'
         }
       })
   }
