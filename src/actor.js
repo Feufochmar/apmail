@@ -99,10 +99,10 @@ Actor.prototype = {
   loadFromProfileUrl: function(profile_url, callback) {
     this.urls.profile = profile_url
     // Use ActivityPub protocol to get the user infos
-    var request = new XMLHttpRequest()
+    const request = new XMLHttpRequest()
     request.onreadystatechange = function() {
       if (request.readyState == 4 && request.status == 200) {
-        var answer = JSON.parse(request.responseText)
+        const answer = JSON.parse(request.responseText)
         if (answer && this.isExpectedActorType(answer.type)) {
           this.raw = answer
           // name and server are previously filled if called from loadFromNameAndServer
@@ -143,6 +143,15 @@ Actor.prototype = {
     request.setRequestHeader('Content-Type', 'application/activity+json')
     request.setRequestHeader('Accept', 'application/activity+json')
     request.send()
+  },
+  // Fill the values of actor from fixed data
+  // Usefull for displaying non-actors appearing in audience fields
+  fromDummyData: function(name, server, display_name, url) {
+    this.valid = true
+    this.name = name
+    this.server = server
+    this.info.display_name = display_name
+    this.urls.profile = url
   }
 }
 
