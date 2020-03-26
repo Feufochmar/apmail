@@ -45,13 +45,22 @@ Actor.prototype = {
   address: function() {
     return this.name + '@' + this.server
   },
-  // Load from name@server.
+  // Load from a "name@server" address.
   // Callback is a function accepting two arguments:
   // - a boolean indicating if the loading is complete or in failure,
   // - a string indicating the failure
-  loadFromNameAndServer: function(name, server, callback) {
-    this.name = name
-    this.server = server
+  loadFromNameServerAddress: function(address, callback) {
+    var names = address.split('@')
+    if (names.length < 2) {
+      // Invalid data, return
+      callback(false, 'Invalid address format.')
+      return
+    }
+    this.server = names.splice(names.length - 1, 1)
+    this.name = names.splice(0, 1)
+    for (const elem of names) {
+      this.name = this.name + '@' + elem
+    }
     // Use Webfinger to find the profile URL
     var request = new XMLHttpRequest()
     request.onreadystatechange = function() {
@@ -76,7 +85,7 @@ Actor.prototype = {
         callback(false, 'webfinger: server error')
       }
     }.bind(this)
-    request.open('GET', 'https://' + server + '/.well-known/webfinger' + '?resource=acct:' + name + '@' + server, true)
+    request.open('GET', 'https://' + this.server + '/.well-known/webfinger' + '?resource=acct:' + address, true)
     request.send()
   },
   // Indicate if the type is compatible with an actor

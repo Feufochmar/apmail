@@ -100,21 +100,11 @@ var UI = {
         }
       })
   },
-  // Get the username + servername from an address "user@server"
-  getUserAndServer: function(address) {
-    var names = address.split('@')
-    return {
-      user: names[0],
-      server: names[1]
-    }
-  },
   // When the user enter its address, load the actor representing the user
   selectUser: function() {
-    // Get the user name and server name
-    var names = UI.getUserAndServer(Elem('connect-username').value)
     // Load the actor and go to the ask-password page
-    ConnectedUser.actor.loadFromNameAndServer(
-      names.user, names.server,
+    ConnectedUser.actor.loadFromNameServerAddress(
+      Elem('connect-username').value,
       function(load_ok, failure_message) {
         if (load_ok) {
           UI.showPage('ask-password')
@@ -167,10 +157,9 @@ var UI = {
   },
   // Add to recipient lists
   addToRecipient: function() {
-    var names = UI.getUserAndServer(Elem('send-message-to-recipient').value)
     var actor = new Actor()
-    actor.loadFromNameAndServer(
-      names.user, names.server,
+    actor.loadFromNameServerAddress(
+      Elem('send-message-to-recipient').value,
       function(load_ok, failure_message) {
         if (load_ok) {
           UI.composed_message.addToRecipient(actor)
@@ -181,10 +170,9 @@ var UI = {
       })
   },
   addCcRecipient: function() {
-    var names = UI.getUserAndServer(Elem('send-message-cc-recipient').value)
     var actor = new Actor()
-    actor.loadFromNameAndServer(
-      names.user, names.server,
+    actor.loadFromNameServerAddress(
+      Elem('send-message-cc-recipient').value,
       function(load_ok, failure_message) {
         if (load_ok) {
           UI.composed_message.addCcRecipient(actor)
@@ -343,10 +331,9 @@ var UI = {
     Elem('lookup-user-timeline').innerHTML = ''
     Elem('lookup-user-error').innerHTML = ''
     Elem('lookup-user-timeline-error').innerHTML = ''
-    var names = UI.getUserAndServer(Elem('lookup-user').value)
     var actor = new Actor()
-    actor.loadFromNameAndServer(
-      names.user, names.server,
+    actor.loadFromNameServerAddress(
+      Elem('lookup-user').value,
       function(load_ok, failure_message) {
         if (load_ok) {
           Elem('lookup-user-info').innerHTML = UI.renderActor(actor)

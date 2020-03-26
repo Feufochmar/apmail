@@ -1,7 +1,7 @@
 const {Actor} = require('./actor.js')
 
 // Connected user structure
-var ConnectedUser = {
+const ConnectedUser = {
   // Data
   actor: new Actor(),
   tokens: {
@@ -18,15 +18,15 @@ var ConnectedUser = {
   // Load data from local storage if possible
   // Callback is used to get the status of the loading
   loadFromLocalStorage: function (callback) {
-    var server_name = window.localStorage.getItem('last:server.name')
-    var user_name = window.localStorage.getItem('last:user.name')
+    const server_name = window.localStorage.getItem('last:server.name')
+    const user_name = window.localStorage.getItem('last:user.name')
     if (server_name && user_name) {
       ConnectedUser.tokens.server.client_id = window.localStorage.getItem('client_id:' + server_name)
       ConnectedUser.tokens.server.client_secret = window.localStorage.getItem('client_secret:' + server_name)
       ConnectedUser.tokens.user.refresh_token = window.localStorage.getItem('refresh_token:' + user_name + '@' + server_name)
       ConnectedUser.tokens.user.access_token = window.localStorage.getItem('access_token:' + user_name + '@' + server_name)
       // Load the rest with webfinger / activity pub requests
-      ConnectedUser.actor.loadFromNameAndServer(user_name, server_name, callback)
+      ConnectedUser.actor.loadFromNameServerAddress(user_name + '@' + server_name, callback)
     } else {
       callback(false, 'local storage: no data')
     }
