@@ -33,6 +33,18 @@ Actor.prototype = {
   raw: undefined,
   valid: false,
   // Methods
+  // Get the name used for display
+  displayName: function() {
+    if (this.info.display_name) {
+      return this.info.display_name
+    } else {
+      return this.name
+    }
+  },
+  // Get the address
+  address: function() {
+    return this.name + '@' + this.server
+  },
   // Load from name@server.
   // Callback is a function accepting two arguments:
   // - a boolean indicating if the loading is complete or in failure,
