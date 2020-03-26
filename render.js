@@ -21,9 +21,9 @@ var UI = {
         display = display + '<img src="' + actor.info.icon + '" width="32" height="32" /> '
       }
       display = display
-        + '<p style="display:inline-block;"><strong>' + actor.info.display_name + '</strong> <br/>'
+        + '<p style="display:inline-block;"><strong>' + actor.displayName() + '</strong> <br/>'
         + '<a href="' + actor.urls.profile + '">'
-        + actor.name + '@' + actor.server
+        + actor.address()
         + '</a></p>'
     } else {
       display = display
@@ -320,9 +320,9 @@ var UI = {
         display = display + '<img src="' + actor.info.icon + '" width="96" height="96" /> '
       }
       display = display
-      + '<p style="display:inline-block;"><strong>' + actor.info.display_name + '</strong> <br/>'
+      + '<p style="display:inline-block;"><strong>' + actor.displayName() + '</strong> <br/>'
       + '<a href="' + actor.urls.profile + '">'
-      + actor.name + '@' + actor.server
+      + actor.address()
       + '</a></p>'
       + '<p>' + actor.info.summary + '</p>'
     } else {
@@ -333,7 +333,7 @@ var UI = {
       + '</a></p>'
     }
     display = display + '</section>'
-    if (actor.valid) {
+    if (actor.raw) {
       display = display + UI.renderRawData(actor.raw)
     }
     return display
