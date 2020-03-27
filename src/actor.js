@@ -130,7 +130,7 @@ Actor.prototype = {
             this.urls.oauth_authorization = answer.endpoints.oauthAuthorizationEndpoint
           }
           this.valid = true
-          callback(true, 'ok')
+          callback(true, undefined)
         } else {
           callback(false, 'user profile: incorrect response from server')
           console.log(answer)

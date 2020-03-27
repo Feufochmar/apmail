@@ -20,7 +20,7 @@ const KnownActors = {
   // Retrieve an actor
   retrieve: function(profile, callback) {
     if (KnownActors.get(profile)) {
-      callback(true, 'ok')
+      callback(true, undefined)
     } else {
       const actor = new Actor()
       actor.loadFromProfileUrl(
@@ -35,7 +35,7 @@ const KnownActors = {
 
 // A representation of "everyone" in Actor class
 const publicActor = new Actor()
-publicActor.fromDummyData('', 'public', 'Everyone', 'https://www.w3.org/ns/activitystreams#Public')
+publicActor.fromDummyData('', 'public', 'Anyone', 'https://www.w3.org/ns/activitystreams#Public')
 KnownActors.set(publicActor.urls.profile, publicActor)
 
 // Exported structures

@@ -51,7 +51,7 @@ Timeline.prototype = {
           this.parseActivities(raw_activities, callback)
         }.bind(this))
     } else {
-      callback(true, 'ok')
+      callback(true, undefined)
     }
   }
 }

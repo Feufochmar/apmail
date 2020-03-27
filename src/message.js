@@ -82,7 +82,7 @@ Message.prototype = {
     var request = new XMLHttpRequest()
     request.onreadystatechange = function() {
       if (request.readyState == 4 && request.status == 201) {
-        callback(true, 'ok')
+        callback(true, undefined)
       } else if (request.readyState == 4) {
         callback(false, 'Send: Message not created on server')
       }

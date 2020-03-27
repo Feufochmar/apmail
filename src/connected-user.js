@@ -28,7 +28,7 @@ const ConnectedUser = {
       // Load the rest with webfinger / activity pub requests
       ConnectedUser.actor.loadFromNameServerAddress(user_name + '@' + server_name, callback)
     } else {
-      callback(false, 'local storage: no data')
+      callback(false, 'user not connected')
     }
   },
   saveToLocalStorage: function () {
@@ -76,7 +76,7 @@ const ConnectedUser = {
       if (client_id && client_secret) {
         ConnectedUser.tokens.server.client_id = client_id
         ConnectedUser.tokens.server.client_secret = client_secret
-        callback(true, 'ok')
+        callback(true, undefined)
       } else {
         // generate keys and store them
         var request = new XMLHttpRequest()
@@ -93,7 +93,7 @@ const ConnectedUser = {
               window.localStorage.setItem('client_id:' + ConnectedUser.actor.server, ConnectedUser.tokens.server.client_id)
               window.localStorage.setItem('client_secret:' + ConnectedUser.actor.server, ConnectedUser.tokens.server.client_secret)
               // Continue
-              callback(true, 'ok')
+              callback(true, undefined)
             } else {
               callback(false, 'OAuth: server did not register client.')
             }
@@ -124,7 +124,7 @@ const ConnectedUser = {
         // Save the tokens
         ConnectedUser.saveToLocalStorage()
         // OK, return to callback
-        callback(true, 'ok')
+        callback(true, undefined)
       } else if (request.readyState == 4) {
         callback(false, 'OAuth: cannot get user tokens')
       }

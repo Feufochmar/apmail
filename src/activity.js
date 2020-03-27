@@ -29,7 +29,7 @@ Activity.prototype = {
         } else if (this.raw.cc) {
           this.loadCcActors(this.raw.cc.values(), callback)
         } else {
-          callback(true, 'ok')
+          callback(true, undefined)
         }
       }.bind(this))
   },
@@ -41,7 +41,7 @@ Activity.prototype = {
       if (this.raw.cc) {
         this.loadCcActors(this.raw.cc.values(), callback)
       } else {
-        callback(true, 'ok')
+        callback(true, undefined)
       }
     } else {
       const profile = next.value
@@ -61,7 +61,7 @@ Activity.prototype = {
   loadCcActors: function(iter, callback) {
     const next = iter.next()
     if (next.done) {
-      callback(true, 'ok')
+      callback(true, undefined)
     } else {
       const profile = next.value
       KnownActors.retrieve(
