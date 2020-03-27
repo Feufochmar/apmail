@@ -7,31 +7,19 @@ body {
 
   color: hsl(240, 10%, 15%);
   border-color: hsl(240, 10%, 15%);
-}
 
-/* Header */
-header {
-  padding: 0;
-  margin: 0;
-  background-color: hsl(240, 10%, 75%);
-  border-style: solid;
-  border-width: thin;
-  border-radius: 0.5em;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  padding-left: 1em;
-  padding-right: 1em;
-  text-align: center;
-  margin-bottom: 0.5em;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
 }
 
 nav {
   padding: 0;
   margin: 0;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: stretch;
 }
 
 .page {
@@ -47,8 +35,19 @@ nav {
   margin: 0;
   border-style: solid;
   border-width: thin;
-  border-radius: 0.5em 0.5em 0 0;
   background-color: hsl(240, 10%, 65%);
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.error {
+  padding: 0;
+  margin: 0;
+  background-color: hsl(0, 40%, 85%);
+  border-style: solid;
+  border-width: thin;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   padding-left: 1em;
@@ -92,27 +91,26 @@ main {
   background-color: hsl(240, 10%, 85%);
   border-style: solid;
   border-width: thin;
-  border-radius: 0 0.5em 0.5em 0.5em;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   padding-left: 1em;
   padding-right: 1em;
 }
 
-/* Footer */
-footer {
+.timeline {
   padding: 0;
   margin: 0;
-  background-color: hsl(240, 10%, 75%);
+  background-color: hsl(240, 10%, 85%);
   border-style: solid;
   border-width: thin;
-  border-radius: 0.5em;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   padding-left: 1em;
   padding-right: 1em;
-  text-align: center;
-  margin-top: 0.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
 }
 
 /* Other */
@@ -146,7 +144,6 @@ li.actor-display {
   display: inline-block;
   border-style: solid;
   border-width: thin;
-  border-radius: 0.5em;
   padding: 0.1em;
   margin: 0;
   margin-left: 0.5em;
@@ -158,7 +155,6 @@ article.activity {
   display: block;
   border-style: solid;
   border-width: thin;
-  border-radius: 0.5em;
   margin: 0;
   padding: 0.5em;
   margin-top: 0.1em;
@@ -191,4 +187,8 @@ section.activity-object-field:after {
 
 section.activity-object-content {
   background-color: hsl(240, 10%, 95%);
+}
+
+#profile-display-name {
+  font-size: xx-large;
 }
