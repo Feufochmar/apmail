@@ -83,17 +83,68 @@
           <p id="profile-summary">
           </p>
         </section>
+        <details>
+          <summary>Show source</summary>
+          <textarea rows="30" cols="120" readonly id="profile-code-source">
+          </textarea>
+        </details>
+      </main>
+      <!-- Show Activity page -->
+      <main id="show-activity" style="display:none;">
+        <h4>Activity <span id="activity-type"></span></h4>
+        <p>Published: <span id="activity-published"></span></p>
         <section>
+          From:
+          <span id="activity-actor-icon"></span>
+          <p style="display:inline-block;">
+            <span id="activity-actor-display-name"></span><br/>
+            <a id="activity-actor-address"></a>
+          </p>
+        </section>
+        <details>
+          <summary>Audience</summary>
+          <p>To: <ul id="activity-to" class="recipient-list"></ul></p>
+          <p>Cc: <ul id="activity-cc" class="recipient-list"></ul></p>
+        </details>
+        <details>
+          <summary>Show source</summary>
+          <textarea rows="30" cols="120" readonly id="activity-code-source">
+          </textarea>
+        </details>
+        <!-- Object display -->
+        <section id="activity-object">
+          <h4>Object <span id="activity-object-type"></span></h4>
+          <p>Published: <span id="activity-object-published"></span></p>
+          <section>
+            Author:
+            <span id="activity-object-actor-icon"></span>
+            <p style="display:inline-block;">
+              <span id="activity-object-actor-display-name"></span><br/>
+              <a id="activity-object-actor-address"></a>
+            </p>
+          </section>
+          <details>
+            <summary>Audience</summary>
+            <p>To: <ul id="activity-object-to" class="recipient-list"></ul></p>
+            <p>Cc: <ul id="activity-object-cc" class="recipient-list"></ul></p>
+          </details>
+          <h5><span id="activity-object-title"></span><h5>
+          <p id="activity-object-summary"><p>
+          <p id="activity-object-content"><p>
+          <details>
+            <summary>Attachments</summary>
+            <ul id="activity-object-attachments" class="attachments"></ul>
+          </details>
+          <details>
+            <summary>Tags</summary>
+            <ul id="activity-object-tags" class="tags"></ul>
+          </details>
           <details>
             <summary>Show source</summary>
-            <textarea rows="30" cols="120" readonly id="profile-code-source">
+            <textarea rows="30" cols="120" readonly id="activity-object-code-source">
             </textarea>
           </details>
         </section>
-      </main>
-      <!-- Show Message page -->
-      <main id="show-message" style="display:none;">
-        <section id="message-info"></section>
       </main>
       <!-- Send message page -->
       <main id="send-message" style="display:none;">

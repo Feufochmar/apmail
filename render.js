@@ -2,6 +2,7 @@ const {Actor} = require('./src/actor.js')
 const {Timeline} = require('./src/timeline.js')
 const {Message} = require('./src/message.js')
 const {ConnectedUser} = require('./src/connected-user.js')
+const {KnownActivities} = require('./src/known-activities.js')
 
 // For access of elements
 const Elem = function(id) {
@@ -19,11 +20,8 @@ const Render = {
   audienceActor: function(actor) {
     var display = '<section class="actor-display">'
     if (actor.valid) {
-      var icon = actor.info.icon
-      if (!icon) {
-        icon = Icons['unknown-user']
-      }
-      display = display + '<img src="' + actor.info.icon + '" width="32" height="32" /> '
+      const icon = actor.info.icon ? actor.info.icon : Icons['unknown-user']
+      display = display + '<img src="' + icon + '" width="32" height="32" /> '
       + '<p style="display:inline-block;"><strong>' + actor.displayName() + '</strong> <br/>'
       + '<a href="' + actor.urls.profile + '">'
       + actor.address()
@@ -153,10 +151,7 @@ const UI = {
     },
     'ask-password': function(_) {
       Elem('connect-password').value = ''
-      var icon = ConnectedUser.actor.info.icon
-      if (!icon) {
-        icon = Icons['unknown-user']
-      }
+      const icon = ConnectedUser.actor.info.icon ? ConnectedUser.actor.info.icon : Icons['unknown-user']
       Elem('ask-password-user-icon').innerHTML = '<img src="' + icon + '" width="32" height="32" />'
       Elem('ask-password-user-display-name').innerText = ConnectedUser.actor.displayName()
       Elem('ask-password-user-address').href = ConnectedUser.actor.urls.profile
@@ -164,10 +159,7 @@ const UI = {
     },
     'show-profile': function(actor) {
       // data contains the actor to display
-      var icon = actor.info.icon
-      if (!icon) {
-        icon = Icons['unknown-user']
-      }
+      const icon = actor.info.icon ? actor.info.icon : Icons['unknown-user']
       Elem('profile-icon').innerHTML = '<img src="' + icon + '" width="96" height="96" />'
       Elem('profile-display-name').innerText = actor.displayName()
       Elem('profile-address').href = actor.urls.profile
@@ -175,7 +167,38 @@ const UI = {
       Elem('profile-summary').innerHTML = actor.info.summary
       Elem('profile-code-source').value = JSON.stringify(actor.raw, null, 1)
     },
-    'show-message': function(data) {
+    'show-activity': function(activity) {
+      // data contains the activity to display
+      Elem('activity-type').innerText = activity.type
+      Elem('activity-published').innerText = activity.published ? activity.published.toLocaleString() : ''
+      const icon = activity.actor.info.icon ? activity.actor.info.icon : Icons['unknown-user']
+      Elem('activity-actor-icon').innerHTML = '<img src="' + icon + '" width="48" height="48" />'
+      Elem('activity-actor-display-name').innerText = activity.actor.displayName()
+      Elem('activity-actor-address').innerText = activity.actor.address()
+      Elem('activity-actor-address').href = activity.actor.urls.profile
+      Elem('activity-to').innerHTML = activity.to.map(
+        function(element) {
+          return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
+        }).join('')
+      Elem('activity-cc').innerHTML = activity.cc.map(
+        function(element) {
+          return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
+        }).join('')
+      Elem('activity-code-source').value = JSON.stringify(activity.raw, null, 1)
+      // Object of activity
+      // Elem('activity-object-type')
+      // Elem('activity-object-published')
+      // Elem('activity-object-actor-icon')
+      // Elem('activity-object-actor-display-name')
+      // Elem('activity-object-actor-address')
+      // Elem('activity-object-to')
+      // Elem('activity-object-cc')
+      // Elem('activity-object-title')
+      // Elem('activity-object-summary')
+      // Elem('activity-object-content')
+      // Elem('activity-object-attachments')
+      // Elem('activity-object-tags')
+      // Elem('activity-object-code-source')
     },
     'send-message': function(_) {
       Elem('send-message-to-recipient').value = ''
@@ -413,73 +436,6 @@ const UI = {
   },
   // Show contents of activities
   showActivity: function(activityId) {
-    // TODO
+    UI.showPage('show-activity', KnownActivities.get(activityId))
   }
-
-
-/*
-  renderRawData: function(rawData) {
-    var str_data = JSON.stringify(rawData, null, 1)
-    var replace_map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      '\'': '&#039;'
-    }
-    str_data = str_data.replace(/[&<>"']/g, x => replace_map[x])
-    return '<section class="data-raw"><details>'
-    + '<summary>Raw data</summary>'
-    + '<textarea rows="30" cols="120" readonly>' + str_data + '</textarea>'
-    + '</details></section>'
-  },
-  renderObject: {
-    'Note': function(activity) {
-      return '<article class="activity create note">'
-        + '<section class="activity-object-field">From ' + (activity.actor ? UI.renderActorTag(activity.actor) : '')
-        + ' – ' + (activity.published ? activity.published.toLocaleString() : '') + '</section>'
-        + '<section class="activity-object-field"> To ' + (activity.to ? activity.to.map(x => UI.renderActorTag(x)).join(' ') : '' ) + '</section>'
-        + '<section class="activity-object-field"> Cc ' + (activity.cc ? activity.cc.map(x => UI.renderActorTag(x)).join(' ') : '' ) + '</section>'
-        + '<section class="activity-object-field">Subject: ' + (activity.object.summary ? activity.object.summary : '' ) + '</section>'
-        + '<section class="activity-object-field activity-object-content">' + (activity.object.content ? activity.object.content : '' ) + '</section>'
-        + UI.renderRawData(activity.raw)
-        + '</article>'
-    }
-  },
-  renderActivity: {
-    'Create': function(activity) {
-      if (UI.renderObject[activity.object.type]) {
-        return UI.renderObject[activity.object.type](activity)
-      } else {
-        return '<article class="activity create">'
-          + 'Object creation (' + activity.object.type + ').'
-          + UI.renderRawData(activity.raw)
-          + '</article>'
-      }
-    },
-    'Like': function(activity) {
-      return '<article class="activity like">'
-        + (activity.actor ? UI.renderActorTag(activity.actor) : '')
-        + " liked "
-        + (activity.object ? '<a href="' + activity.object + '">' + activity.object + '</a>' : '')
-        + UI.renderRawData(activity.raw)
-        + '</article>'
-    },
-    'Announce': function(activity) {
-      return '<article class="activity share">'
-        + (activity.actor ? UI.renderActorTag(activity.actor) : '')
-        + " shared "
-        + (activity.object ? '<a href="' + activity.object + '">' + activity.object + '</a>' : '')
-        + UI.renderRawData(activity.raw)
-        + '</article>'
-    },
-    'Delete': function(activity) {
-      return '<article class="activity delete">'
-        + (activity.actor ? UI.renderActorTag(activity.actor) : '')
-        + " deleted an object."
-        + UI.renderRawData(activity.raw)
-        + '</article>'
-    }
-  }
-  */
 }

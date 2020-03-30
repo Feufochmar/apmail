@@ -1,4 +1,5 @@
 const {Activity} = require('./activity.js')
+const {KnownActivities} = require('./known-activities.js')
 
 // Timeline class
 // Represent a collection of activities
@@ -27,12 +28,12 @@ Timeline.prototype = {
           this.activities = []
           this.prev = answer.first.prev
           this.next = answer.first.next
-          this.parseActivities(answer.first.orderedItems, callback)
+          this.parseActivities(answer.first.orderedItems, token, callback)
         } else if (answer.type === 'OrderedCollectionPage') {
           this.activities = []
           this.prev = answer.prev
           this.next = answer.next
-          this.parseActivities(answer.orderedItems, callback)
+          this.parseActivities(answer.orderedItems, token, callback)
         } else {
           callback(false, 'Timeline: unexpected answer from server')
           console.log(answer)
@@ -49,17 +50,29 @@ Timeline.prototype = {
     request.setRequestHeader('Accept', 'application/activity+json')
     request.send()
   },
-  parseActivities: function(raw_activities, callback) {
+  parseActivities: function(raw_activities, token, callback) {
     // Get the next activity
     const raw_act = raw_activities.shift()
-    if (raw_act) {
+    if (raw_act && typeof raw_act === 'string') {
+      // link, and not the object itself => fetch the activity
+      KnownActivities.retrieve(raw_act, token, function(load_ok, activity, failure_message) {
+        if (load_ok) {
+          // Push to the list of activities
+          this.activities.push(activity)
+        }
+        this.parseActivities(raw_activities, token, callback)
+      }.bind(this))
+    } else if (raw_act) {
       const act = new Activity(raw_act)
       act.loadActors(
         function(load_ok, failure_message) {
           if (load_ok) {
+            // Push to the list of activities
             this.activities.push(act)
+            // Add the activity to the known activities
+            KnownActivities.set(act.id, act)
           }
-          this.parseActivities(raw_activities, callback)
+          this.parseActivities(raw_activities, token, callback)
         }.bind(this))
     } else {
       callback(true, undefined)
