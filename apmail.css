@@ -189,18 +189,11 @@ p {
   padding: 0;
 }
 
-section.activity-object-field:after {
-  content: "";
-  display: block;
-  border-style: dotted;
-  border-width: thin;
-  margin: 0;
-  margin-top: 0.1em;
-  margin-bottom: 0.1em;
-}
-
 section.activity-object-content {
   background-color: hsl(240, 10%, 95%);
+  padding: 0.1em;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
 }
 
 #profile-display-name {

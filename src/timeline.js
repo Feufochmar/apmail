@@ -29,6 +29,12 @@ Timeline.prototype = {
           this.prev = answer.first.prev
           this.next = answer.first.next
           this.parseActivities(answer.first.orderedItems, token, callback)
+        } else if (answer.type === 'OrderedCollection' && answer.orderedItems) {
+          // Collection is not paginated
+          this.activities = []
+          this.prev = answer.prev
+          this.next = answer.next
+          this.parseActivities(answer.orderedItems, token, callback)
         } else if (answer.type === 'OrderedCollectionPage') {
           this.activities = []
           this.prev = answer.prev
@@ -64,7 +70,8 @@ Timeline.prototype = {
       }.bind(this))
     } else if (raw_act) {
       const act = new Activity(raw_act)
-      act.loadActors(
+      act.load(
+        token,
         function(load_ok, failure_message) {
           if (load_ok) {
             // Push to the list of activities

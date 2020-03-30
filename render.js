@@ -48,40 +48,6 @@ const Render = {
     }
     str_data = str_data.replace(/[&<>"']/g, x => replace_map[x])
     return str_data
-  },
-  // Activity in timeline
-  // By type of activity
-  timelineActivity: {
-    'Create': function(activity) {
-      var display = '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
-      + 'New ' + activity.object.type + '<br/>'
-      + '<strong>' + activity.actor.displayName() + '</strong><br/>'
-      if (activity.object.summary) {
-        display = display + '<em>' + activity.object.summary + '</em>'
-      } else {
-        display = display + '<em>No summary</em>'
-      }
-      display = display + '</section>'
-      return display
-    },
-    'Like': function(activity) {
-      return '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
-      + 'Like <br/>'
-      + '<strong>' + activity.actor.displayName() + '</strong>'
-      + '</section>'
-    },
-    'Announce': function(activity) {
-      return '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
-      + 'Announce <br/>'
-      + '<strong>' + activity.actor.displayName() + '</strong>'
-      + '</section>'
-    },
-    'Delete': function(activity) {
-      return '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
-      + 'Delete <br/>'
-      + '<strong>' + activity.actor.displayName() + '</strong>'
-      + '</section>'
-    }
   }
 }
 
@@ -186,19 +152,33 @@ const UI = {
         }).join('')
       Elem('activity-code-source').value = JSON.stringify(activity.raw, null, 1)
       // Object of activity
-      // Elem('activity-object-type')
-      // Elem('activity-object-published')
-      // Elem('activity-object-actor-icon')
-      // Elem('activity-object-actor-display-name')
-      // Elem('activity-object-actor-address')
-      // Elem('activity-object-to')
-      // Elem('activity-object-cc')
-      // Elem('activity-object-title')
-      // Elem('activity-object-summary')
-      // Elem('activity-object-content')
-      // Elem('activity-object-attachments')
-      // Elem('activity-object-tags')
-      // Elem('activity-object-code-source')
+      if (activity.object) {
+        Elem('activity-object').style.display = 'block'
+        Elem('activity-object-type').innerText = activity.object.type
+        Elem('activity-object-published').innerText = activity.object.published ? activity.object.published.toLocaleString() : ''
+        const icon = activity.object.actor.info.icon ? activity.object.actor.info.icon : Icons['unknown-user']
+        Elem('activity-object-actor-icon').innerHTML = '<img src="' + icon + '" width="48" height="48" />'
+        Elem('activity-object-actor-display-name').innerText = activity.object.actor.displayName()
+        Elem('activity-object-actor-address').innerText = activity.object.actor.address()
+        Elem('activity-object-actor-address').href = activity.object.actor.urls.profile
+        Elem('activity-object-to').innerHTML = activity.object.to.map(
+          function(element) {
+            return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
+          }).join('')
+        Elem('activity-object-cc').innerHTML = activity.object.cc.map(
+          function(element) {
+            return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
+          }).join('')
+        Elem('activity-object-code-source').value = JSON.stringify(activity.object.raw, null, 1)
+        Elem('activity-object-title').innerText = activity.object.title
+        Elem('activity-object-summary').innerText = activity.object.summary
+        Elem('activity-object-content').innerHTML = activity.object.content
+        // Elem('activity-object-attachments')
+        // Elem('activity-object-tags')
+      } else {
+        // Hide the element
+        Elem('activity-object').style.display = 'none'
+      }
     },
     'send-message': function(_) {
       Elem('send-message-to-recipient').value = ''
@@ -281,13 +261,9 @@ const UI = {
         function(load_ok, failure_message) {
           if (load_ok) {
             Elem('timeline-data').innerHTML = UI.timeline.activities.map(function(activity) {
-              if (Render.timelineActivity[activity.type]) {
-                return Render.timelineActivity[activity.type](activity)
-              } else {
-                return '<section class="timeline-activity">'
-                + 'Other activity (' + activity.type + ')<br/>'
-                + '<strong>' + activity.actor.displayName() + '</strong></section>'
-              }
+              return '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
+              + activity.type + ' Activity<br/>'
+              + '<strong>' + activity.actor.displayName() + '</strong></section>'
             }).join('')
             if (UI.timeline.prev) {
               Elem('timeline-prev-top').style.display = 'block'
@@ -301,8 +277,7 @@ const UI = {
             UI.displayTimelineError(failure_message)
             Elem('timeline-data').innerHTML = ''
           }
-        }
-      )
+        })
     } else {
       Elem('timeline').style.display = 'none'
     }

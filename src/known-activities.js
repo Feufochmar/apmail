@@ -25,7 +25,8 @@ const KnownActivities = {
           const answer = JSON.parse(request.responseText)
           if (answer) {
             const activity = new Activity(answer)
-            activity.loadActors(
+            activity.load(
+              token,
               function(load_ok, failure_message) {
                 if (load_ok) {
                   KnownActivities.set(id, activity)

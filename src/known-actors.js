@@ -19,7 +19,7 @@ const KnownActors = {
   },
   // Retrieve an actor
   // Callback takes three arguments: load_ok, retrieved_actor, failure_message
-  retrieve: function(profile, callback) {
+  retrieve: function(profile, token, callback) {
     if (KnownActors.get(profile)) {
       callback(true, KnownActors.get(profile), undefined)
     } else {

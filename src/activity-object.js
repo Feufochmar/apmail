@@ -1,25 +1,77 @@
 const {Actor} = require('./actor.js')
 const {KnownActors} = require('./known-actors.js')
-const {ASObject} = require('./activity-object.js')
 
-// Activity class
-const Activity = function(raw_activity) {
-  this.raw = raw_activity
-  this.id = raw_activity.id
-  this.type = raw_activity.type
-  this.published = raw_activity.published ? new Date(raw_activity.published) : undefined
-  // filled in loadObject
-  this.object = undefined
+// ASObject class: represent of Object of the ActivityStream spec
+const ASObject = function(raw_object) {
+  this.raw = raw_object
+  this.id = raw_object.id
+  this.type = raw_object.type
+  this.published = raw_object.published ? new Date(raw_object.published) : undefined
+  this.title = raw_object.title ? raw_object.title : ''
+  this.summary = raw_object.summary ? raw_object.summary : ''
+  this.content = raw_object.content ? raw_object.content : ''
   // actor, to, cc are filled in loadActors
   this.actor = new Actor()
   this.to = []
   this.cc = []
 }
-Activity.prototype = {
+// Fetch function
+// Callback takes 3 parameters: load_ok, fetched_object, failure_message
+ASObject.fetch = function(url, token, callback) {
+  if (typeof url === 'object') {
+    // No need to fetch: already an object
+    const obj = new ASObject(url)
+    obj.load(token, function(load_ok, failure_message) {
+      if (load_ok) {
+        callback(true, obj, undefined)
+      } else {
+        callback(false, undefined, failure_message)
+      }
+    })
+  } else {
+    // Use ActivityPub protocol to get the object
+    // The id is the link to the object on the server
+    const request = new XMLHttpRequest()
+    request.onreadystatechange = function() {
+      if (request.readyState == 4 && request.status == 200) {
+        const answer = JSON.parse(request.responseText)
+        if (answer) {
+          const obj = new ASObject(answer)
+          obj.load(token, function(load_ok, failure_message) {
+            if (load_ok) {
+              callback(true, obj, undefined)
+            } else {
+              callback(false, undefined, 'Unable to retrieve actors of objects.')
+              console.log(answer)
+            }
+          })
+        } else {
+          callback(false, undefined, 'Unable to retrieve object.')
+          console.log(answer)
+        }
+      } else if (request.readyState == 4) {
+        callback(false, undefined, 'Error during retrieval of object.')
+      }
+    }
+    request.open('GET', url, true)
+    if (token) {
+      request.setRequestHeader('Authorization', 'Bearer ' + token)
+    }
+    request.setRequestHeader('Content-Type', 'application/activity+json')
+    request.setRequestHeader('Accept', 'application/activity+json')
+    request.send()
+  }
+}
+
+ASObject.prototype = {
   // Load the actors present in the actor, to and cc fields
   loadActors: function(token, callback) {
-    // Load the actor
-    const profile = this.raw.actor
+    // Load the author
+    // Try: actor, then attributedTo
+    var profile = this.raw.actor
+    if (!profile) {
+      profile = this.raw.attributedTo
+    }
     KnownActors.retrieve(
       profile,
       token,
@@ -91,29 +143,11 @@ Activity.prototype = {
         }.bind(this))
     }
   },
-  // Load the object
-  loadObject: function(token, callback) {
-    // Fetch the object if there is one
-    if (this.raw.object) {
-      ASObject.fetch(this.raw.object, token, function(load_ok, activity_object, failure_message) {
-        if (load_ok) {
-          this.object = activity_object
-        }
-        callback(load_ok, failure_message)
-      }.bind(this))
-    }
-  },
   // Load everything
   load: function(token, callback) {
-    this.loadActors(token, function(load_ok, failure_message) {
-      if (load_ok) {
-        this.loadObject(token, callback)
-      } else {
-        callback(false, failure_message)
-      }
-    }.bind(this))
+    this.loadActors(token, callback)
   }
 }
 
 // Exported structures
-exports.Activity = Activity
+exports.ASObject = ASObject

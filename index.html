@@ -91,32 +91,31 @@
       </main>
       <!-- Show Activity page -->
       <main id="show-activity" style="display:none;">
-        <h4>Activity <span id="activity-type"></span></h4>
-        <p>Published: <span id="activity-published"></span></p>
-        <section>
-          From:
-          <span id="activity-actor-icon"></span>
-          <p style="display:inline-block;">
-            <span id="activity-actor-display-name"></span><br/>
-            <a id="activity-actor-address"></a>
-          </p>
-        </section>
+        <!-- Activity info -->
         <details>
-          <summary>Audience</summary>
-          <p>To: <ul id="activity-to" class="recipient-list"></ul></p>
-          <p>Cc: <ul id="activity-cc" class="recipient-list"></ul></p>
+          <summary><h4 style="display:inline;"><span id="activity-type"></span> Activity</h4></summary>
+          <p>Published: <span id="activity-published"></span></p>
+          <h4>Actor</h4>
+            <span id="activity-actor-icon"></span>
+            <p style="display:inline-block;">
+              <span id="activity-actor-display-name"></span><br/>
+              <a id="activity-actor-address"></a>
+            </p>
+          <h4>Audience</h4>
+            <p>To: <ul id="activity-to" class="recipient-list"></ul></p>
+            <p>Cc: <ul id="activity-cc" class="recipient-list"></ul></p>
+          <details>
+            <summary>Show source</summary>
+            <textarea rows="30" cols="120" readonly id="activity-code-source">
+            </textarea>
+          </details>
         </details>
-        <details>
-          <summary>Show source</summary>
-          <textarea rows="30" cols="120" readonly id="activity-code-source">
-          </textarea>
-        </details>
-        <!-- Object display -->
+        <!-- Object info -->
         <section id="activity-object">
-          <h4>Object <span id="activity-object-type"></span></h4>
+          <h4><span id="activity-object-type"></span> Object</h4>
           <p>Published: <span id="activity-object-published"></span></p>
           <section>
-            Author:
+            Author:<br/>
             <span id="activity-object-actor-icon"></span>
             <p style="display:inline-block;">
               <span id="activity-object-actor-display-name"></span><br/>
@@ -128,9 +127,11 @@
             <p>To: <ul id="activity-object-to" class="recipient-list"></ul></p>
             <p>Cc: <ul id="activity-object-cc" class="recipient-list"></ul></p>
           </details>
-          <h5><span id="activity-object-title"></span><h5>
-          <p id="activity-object-summary"><p>
-          <p id="activity-object-content"><p>
+          <section class="activity-object-content">
+            <h5><span id="activity-object-title"></span></h5>
+            <em><p id="activity-object-summary"><p></em>
+            <p id="activity-object-content"><p>
+          </section>
           <details>
             <summary>Attachments</summary>
             <ul id="activity-object-attachments" class="attachments"></ul>
