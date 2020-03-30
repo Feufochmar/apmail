@@ -20,9 +20,9 @@ Activity.prototype = {
     const profile = this.raw.actor
     KnownActors.retrieve(
       profile,
-      function(load_ok, failure_message) {
+      function(load_ok, actor, failure_message) {
         if (load_ok) {
-          this.actor = KnownActors.get(profile)
+          this.actor = actor
         }
         // Load the actors in the "to" array, skip to "cc" if there is no "to", and stop is there is no "cc" either
         if (this.raw.to) {
@@ -48,9 +48,9 @@ Activity.prototype = {
       const profile = next.value
       KnownActors.retrieve(
         profile,
-        function(load_ok, failure_message) {
+        function(load_ok, actor, failure_message) {
           if (load_ok) {
-            this.to.push(KnownActors.get(profile))
+            this.to.push(actor)
           } else {
             // Collection ?
           }
@@ -67,9 +67,9 @@ Activity.prototype = {
       const profile = next.value
       KnownActors.retrieve(
         profile,
-        function(load_ok, failure_message) {
+        function(load_ok, actor, failure_message) {
           if (load_ok) {
-            this.cc.push(KnownActors.get(profile))
+            this.cc.push(actor)
           } else {
             // Collection ?
           }

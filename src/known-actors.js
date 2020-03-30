@@ -18,16 +18,17 @@ const KnownActors = {
     }
   },
   // Retrieve an actor
+  // Callback takes three arguments: load_ok, retrieved_actor, failure_message
   retrieve: function(profile, callback) {
     if (KnownActors.get(profile)) {
-      callback(true, undefined)
+      callback(true, KnownActors.get(profile), undefined)
     } else {
       const actor = new Actor()
       actor.loadFromProfileUrl(
         profile,
         function(load_ok, failure_message) {
           KnownActors.set(profile, actor) // in case of failure, actor is not valid
-          callback(load_ok, failure_message)
+          callback(load_ok, actor, failure_message)
         })
     }
   }
