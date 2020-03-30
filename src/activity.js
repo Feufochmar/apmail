@@ -4,6 +4,7 @@ const {KnownActors} = require('./known-actors.js')
 // Activity class
 const Activity = function(raw_activity) {
   this.raw = raw_activity
+  this.id = raw_activity.id
   this.type = raw_activity.type
   this.published = raw_activity.published ? new Date(raw_activity.published) : undefined
   this.object = raw_activity.object

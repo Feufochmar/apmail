@@ -40,6 +40,10 @@ nav {
   padding-bottom: 0.5em;
   padding-left: 1em;
   padding-right: 1em;
+  cursor: pointer;
+}
+.page-label:hover {
+  background-color: hsl(240, 10%, 75%);
 }
 
 .error {
@@ -113,6 +117,12 @@ main {
   align-items: stretch;
 }
 
+.timeline-prev-next {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
 /* Other */
 a:link {
   color: hsl(220, 100%, 40%);
@@ -151,7 +161,7 @@ li.actor-display {
   background-color: hsl(240, 10%, 75%);
 }
 
-article.activity {
+section.timeline-activity {
   display: block;
   border-style: solid;
   border-width: thin;
@@ -159,6 +169,10 @@ article.activity {
   padding: 0.5em;
   margin-top: 0.1em;
   margin-bottom: 0.1em;
+  cursor: pointer;
+}
+section.timeline-activity:hover {
+  background-color: hsl(240, 10%, 75%);
 }
 
 section.actor-display {

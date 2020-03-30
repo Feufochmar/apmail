@@ -31,7 +31,17 @@
     <!-- Timelines -->
     <section id="timeline" style="display:none;">
       <section id="timeline-error" class="error"></section>
-      <section id="timeline-data" class="timeline"></section>
+      <section class="timeline">
+        <section class="timeline-prev-next">
+          <button id="timeline-prev-top" onclick="UI.prevTimeline();">Previous</button>
+          <button id="timeline-next-top" onclick="UI.nextTimeline();">Next</button>
+        </section>
+        <section id="timeline-data"></section>
+        <section class="timeline-prev-next">
+          <button id="timeline-prev-bottom" onclick="UI.prevTimeline();">Previous</button>
+          <button id="timeline-next-bottom" onclick="UI.nextTimeline();">Next</button>
+        </section>
+      </section>
     </section>
     <!-- Content pages -->
     <section id="main-content">

@@ -4,8 +4,19 @@ const {Activity} = require('./activity.js')
 // Represent a collection of activities
 var Timeline = function() {}
 Timeline.prototype = {
+  // attributes
+  // List of activities
+  activities: [],
+  // Link to previous page
+  prev: undefined,
+  // Link to next page
+  next: undefined,
+  // Token used when loading -- for loading prev/next within the same context
+  token: undefined,
+  //
   load: function(url, token, callback) {
-    var request = new XMLHttpRequest()
+    this.token = token
+    const request = new XMLHttpRequest()
     request.onreadystatechange = function() {
       if (request.readyState == 4 && request.status == 200) {
         var answer = JSON.parse(request.responseText)
@@ -40,9 +51,9 @@ Timeline.prototype = {
   },
   parseActivities: function(raw_activities, callback) {
     // Get the next activity
-    var raw_act = raw_activities.shift()
+    const raw_act = raw_activities.shift()
     if (raw_act) {
-      var act = new Activity(raw_act)
+      const act = new Activity(raw_act)
       act.loadActors(
         function(load_ok, failure_message) {
           if (load_ok) {

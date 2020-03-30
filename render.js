@@ -10,7 +10,7 @@ const Elem = function(id) {
 
 // Icon list
 const Icons = {
-  'unknown-user': "/img/unknown-user.svg"
+  'unknown-user': "img/unknown-user.svg"
 }
 
 // To render elements that cannot be present in index.html from a model element
@@ -50,6 +50,40 @@ const Render = {
     }
     str_data = str_data.replace(/[&<>"']/g, x => replace_map[x])
     return str_data
+  },
+  // Activity in timeline
+  // By type of activity
+  timelineActivity: {
+    'Create': function(activity) {
+      var display = '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
+      + 'New ' + activity.object.type + '<br/>'
+      + '<strong>' + activity.actor.displayName() + '</strong><br/>'
+      if (activity.object.summary) {
+        display = display + '<em>' + activity.object.summary + '</em>'
+      } else {
+        display = display + '<em>No summary</em>'
+      }
+      display = display + '</section>'
+      return display
+    },
+    'Like': function(activity) {
+      return '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
+      + 'Like <br/>'
+      + '<strong>' + activity.actor.displayName() + '</strong>'
+      + '</section>'
+    },
+    'Announce': function(activity) {
+      return '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
+      + 'Announce <br/>'
+      + '<strong>' + activity.actor.displayName() + '</strong>'
+      + '</section>'
+    },
+    'Delete': function(activity) {
+      return '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
+      + 'Delete <br/>'
+      + '<strong>' + activity.actor.displayName() + '</strong>'
+      + '</section>'
+    }
   }
 }
 
@@ -60,6 +94,7 @@ const UI = {
   current_context: 'my-inbox', // By default, show the inbox
   is_connected: false, // Indicate if the user is connected
   other_actor: new Actor(), // Other actor to display
+  timeline: new Timeline(), // Collection of activities to display in the central column
   // Contextual methods
   refresh_context: {
     'send-message': function() {
@@ -84,7 +119,7 @@ const UI = {
     'my-outbox': function() {
       UI.updateNav('outbox-selector')
       if (UI.is_connected) {
-        UI.showTimeline(ConnectedUser.actor.urls.inbox, ConnectedUser.tokens.user.access_token)
+        UI.showTimeline(ConnectedUser.actor.urls.outbox, ConnectedUser.tokens.user.access_token)
         UI.showPage('show-profile', ConnectedUser.actor)
       } else {
         UI.showTimeline(undefined, undefined)
@@ -102,12 +137,13 @@ const UI = {
     },
     'other-profile': function() {
       UI.updateNav(undefined)
+      UI.showPage('show-profile', UI.other_actor)
       if (UI.other_actor.urls.outbox) {
         UI.showTimeline(UI.other_actor.urls.outbox, undefined)
       } else {
-        UI.displayTimelineError('Actor does not have a public outbox.')
+        UI.displayContentError('Actor does not have a public outbox.')
+        UI.showTimeline(undefined, undefined)
       }
-      UI.showPage('show-profile', UI.other_actor)
     }
   },
   // Page refresh methods
@@ -211,7 +247,39 @@ const UI = {
     if (url) {
       Elem('timeline').style.display = 'block'
       Elem('timeline-data').innerHTML = 'Loading collection...'
-      // TODO
+      Elem('timeline-prev-top').style.display = 'none'
+      Elem('timeline-prev-bottom').style.display = 'none'
+      Elem('timeline-next-top').style.display = 'none'
+      Elem('timeline-next-bottom').style.display = 'none'
+      UI.timeline = new Timeline()
+      UI.timeline.load(
+        url,
+        token,
+        function(load_ok, failure_message) {
+          if (load_ok) {
+            Elem('timeline-data').innerHTML = UI.timeline.activities.map(function(activity) {
+              if (Render.timelineActivity[activity.type]) {
+                return Render.timelineActivity[activity.type](activity)
+              } else {
+                return '<section class="timeline-activity">'
+                + 'Other activity (' + activity.type + ')<br/>'
+                + '<strong>' + activity.actor.displayName() + '</strong></section>'
+              }
+            }).join('')
+            if (UI.timeline.prev) {
+              Elem('timeline-prev-top').style.display = 'block'
+              Elem('timeline-prev-bottom').style.display = 'block'
+            }
+            if (UI.timeline.next) {
+              Elem('timeline-next-top').style.display = 'block'
+              Elem('timeline-next-bottom').style.display = 'block'
+            }
+          } else {
+            UI.displayTimelineError(failure_message)
+            Elem('timeline-data').innerHTML = ''
+          }
+        }
+      )
     } else {
       Elem('timeline').style.display = 'none'
     }
@@ -331,6 +399,21 @@ const UI = {
           UI.displayContentError('Error when sending message: ' + failure_message)
         }
       })
+  },
+  // Timeline navigation
+  nextTimeline: function() {
+    if (UI.timeline.next) {
+      UI.showTimeline(UI.timeline.next, UI.timeline.token)
+    }
+  },
+  prevTimeline: function() {
+    if (UI.timeline.prev) {
+      UI.showTimeline(UI.timeline.prev, UI.timeline.token)
+    }
+  },
+  // Show contents of activities
+  showActivity: function(activityId) {
+    // TODO
   }
 
 
@@ -397,35 +480,6 @@ const UI = {
         + UI.renderRawData(activity.raw)
         + '</article>'
     }
-  },
-  showTimeline: function(id, token, url) {
-    var timeline = new Timeline()
-    timeline.load(url, token, function(load_ok, failure_message) {
-      if (load_ok) {
-        var content = timeline.activities.map(
-          function(activity) {
-            if (UI.renderActivity[activity.type]) {
-              return UI.renderActivity[activity.type](activity)
-            } else {
-              return '<article class="activity">'
-                + 'Other activity (' + activity.type + ').'
-                + UI.renderRawActivity(activity)
-                + '</article>'
-            }
-          }).join('')
-        content = content + '<section class="prev-next">'
-        if (timeline.prev) {
-          content = content + '<button onclick="UI.showTimeline(\'' + id + '\',' + (token ? '\'' + token + '\'' : 'undefined') + ',\'' + timeline.prev + '\')">Prev</button>'
-        }
-        if (timeline.next) {
-          content = content + '<button onclick="UI.showTimeline(\'' + id + '\',' + (token ? '\'' + token + '\'' : 'undefined') + ',\'' + timeline.next + '\')">Next</button>'
-        }
-        content = content + '</section>'
-        Elem(id).innerHTML = content
-      } else {
-        Elem(id + '-error').innerText = failure_message
-      }
-    })
   }
   */
 }
