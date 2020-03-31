@@ -215,3 +215,14 @@ section.actor-content {
   padding-top: 0.3em;
   padding-bottom: 0.3em;
 }
+
+.attachment-display {
+  display: block;
+  border-style: solid;
+  border-width: thin;
+  padding: 0.1em;
+  margin: 0;
+  margin-left: 0.1em;
+  margin-right: 0.1em;
+  background-color: hsl(240, 10%, 85%);
+}

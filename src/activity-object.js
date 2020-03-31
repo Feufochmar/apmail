@@ -14,6 +14,8 @@ const ASObject = function(raw_object) {
   this.actor = new Actor()
   this.to = []
   this.cc = []
+  //
+  this.attachments = (raw_object.attachment && Array.isArray(raw_object.attachment)) ? raw_object.attachment : []
 }
 // Fetch function
 // Callback takes 3 parameters: load_ok, fetched_object, failure_message

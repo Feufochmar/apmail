@@ -36,18 +36,43 @@ const Render = {
     display = display + '</section>'
     return display
   },
-  // Raw data conversion
-  rawData: function(rawData) {
-    var str_data = JSON.stringify(rawData, null, 1)
-    var replace_map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      '\'': '&#039;'
+  // Render an attachment
+  attachment: function(attachment) {
+    // If a string => link
+    var display = ''
+    if (typeof attachment === 'string') {
+      display = display + '<a href="' + attachment + '">Link to object</a>'
+    } else {
+      const type = attachment.type
+      const name = attachment.name
+      const url = attachment.url
+      const media_type = attachment.mediaType
+      // If the url is a string, display the element
+      if (typeof url === 'string') {
+        display = display + Render.attachmentFrom(type, name, media_type, url)
+      } else if (Array.isArray(url)) {
+        // Array of urls => unsupported
+      } else if (url.type && url.type === 'Link') {
+        // Object
+        display = display + Render.attachmentFrom(type, name, url.mediaType ? url.mediaType : media_type, url.href)
+      } else {
+        // Unsupported
+      }
     }
-    str_data = str_data.replace(/[&<>"']/g, x => replace_map[x])
-    return str_data
+    return display
+  },
+  attachmentFrom: function(type, name, media_type, url) {
+    // Show a link
+    var display = (type ? type : 'Document') + '<br/><a href="' + url + '">' + (name ? name : url) + '</a>'
+    // Show the attachment if it's an image, an audio, or a video
+    if (type && ((type === 'Image') || (type === 'Document' && media_type && media_type.startsWith('image/')))) {
+      display = display + '<br/><img src="' + url + '" width="300" ' + (name ? ('alt="' + name + '"') : '') + ' />'
+    } else if (type && ((type === 'Audio') || (type === 'Document' && media_type && media_type.startsWith('audio/')))) {
+      display = display + '<br/><audio controls preload="none" src="' + url + '">' + (name ? name : url) + '</audio>'
+    } else if (type && ((type === 'Video') || (type === 'Document' && media_type && media_type.startsWith('video/')))) {
+      display = display + '<br/><video controls preload="none" src="' + url + '" width="300" >' + (name ? name : url) + '</video>'
+    }
+    return display
   }
 }
 
@@ -181,8 +206,11 @@ const UI = {
         Elem('activity-object-summary').innerText = activity.object.summary
         Elem('activity-object-content').innerHTML = activity.object.content
         // If there are attachments on the object, display them
-        // Elem('activity-object-attachments')
-        // Elem('activity-object-tags')
+        Elem('activity-object-attachments-number').innerText = activity.object.attachments.length
+        Elem('activity-object-attachments').innerHTML = activity.object.attachments.map(
+          function(element) {
+            return '<li class="attachment-display">' + Render.attachment(element) + '</li>'
+          }).join('')
       } else {
         // Hide the element
         Elem('activity-object').style.display = 'none'

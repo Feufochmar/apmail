@@ -7,7 +7,7 @@
     <link href="apmail.css" rel="stylesheet" type="text/css" media="all" />
     <script src="render.js"></script>
   </head>
-  <body onload="UI.checkConnection()">
+  <body onload="UI.checkConnection();">
     <!-- Navigation column -->
     <nav id="tab-bar" class="column">
       <!-- Send page tab -->
@@ -135,12 +135,8 @@
             <p id="activity-object-content"><p>
           </section>
           <details>
-            <summary>Attachments</summary>
+            <summary>Attachments (<span id="activity-object-attachments-number"></span>)</summary>
             <ul id="activity-object-attachments" class="attachments"></ul>
-          </details>
-          <details>
-            <summary>Tags</summary>
-            <ul id="activity-object-tags" class="tags"></ul>
           </details>
           <details>
             <summary>Show source</summary>
