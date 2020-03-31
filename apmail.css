@@ -2,8 +2,8 @@
 
 body {
   background: hsl(240, 10%, 40%);
-  margin-left: 1.5%;
-  margin-right: 1.5%;
+  margin: 0;
+  padding: 0;
 
   color: hsl(240, 10%, 15%);
   border-color: hsl(240, 10%, 15%);
@@ -11,8 +11,24 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
+  align-items: stretch;
+  width: 99vw;
+  height: 99vh;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
+/* column class */
+.column {
+  background-color: hsl(240, 10%, 75%);
+  margin: 0.1em;
+  width: 12em;
+  min-width: 12em;
+  flex: none;
+  height: 100%;
+}
+
+/* navigation column */
 nav {
   padding: 0;
   margin: 0;
@@ -20,6 +36,10 @@ nav {
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
+}
+
+nav.column {
+  background-color: hsl(240, 10%, 40%);
 }
 
 .page {
@@ -31,34 +51,90 @@ nav {
 }
 
 .page-label {
-  padding: 0;
+  padding: 0.5em;
   margin: 0;
   border-style: solid;
   border-width: thin;
-  background-color: hsl(240, 10%, 65%);
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  padding-left: 1em;
-  padding-right: 1em;
+  background-color: hsl(240, 10%, 75%);
   cursor: pointer;
 }
-.page-label:hover {
-  background-color: hsl(240, 10%, 75%);
+.page:hover+label {
+  background-color: hsl(240, 10%, 85%);
 }
 
-.error {
-  padding: 0;
+#error {
+  padding: 0.5em;
   margin: 0;
-  background-color: hsl(0, 40%, 85%);
-  border-style: solid;
-  border-width: thin;
+  background-color: hsl(0, 60%, 85%);
+  display: none;
+}
+
+/* Main area column */
+#main-content {
+  overflow: scroll;
+  flex: auto;
+}
+
+main {
+  margin: 0;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   padding-left: 1em;
   padding-right: 1em;
 }
 
-/* Main */
+/* Timeline column */
+#timeline-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-prev-next {
+  padding: 0.2em;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+#timeline-data {
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  flex: auto;
+}
+
+section.timeline-activity {
+  display: block;
+  border-style: solid;
+  border-width: thin;
+  margin: 0;
+  padding: 0.5em;
+  cursor: pointer;
+}
+section.timeline-activity:hover {
+  background-color: hsl(240, 10%, 85%);
+}
+
+/* Other */
+a:link {
+  color: hsl(220, 100%, 40%);
+  text-decoration: none;
+}
+a:visited {
+  color: hsl(280, 100%, 40%);
+  text-decoration: none;
+}
+a:hover {
+  color: hsl(220, 100%, 90%);
+  text-shadow: 2px 0px 1px hsl(220, 100%, 30%), -2px 0px 1px hsl(220, 100%, 30%), 0px 2px 1px hsl(220, 100%, 30%), 0px -2px 1px hsl(220, 100%, 30%),
+  1px 1px 0px hsl(220, 100%, 30%), 1px -1px 0px hsl(220, 100%, 30%), -1px 1px 0px hsl(220, 100%, 30%), -1px -1px 0px hsl(220, 100%, 30%);
+}
+
+hr {
+  border-style: solid;
+  border-width: thin;
+}
+
 h1 {
   padding: 0;
   margin: 0;
@@ -89,60 +165,6 @@ h6 {
   margin: 0;
 }
 
-main {
-  padding: 0;
-  margin: 0;
-  background-color: hsl(240, 10%, 85%);
-  border-style: solid;
-  border-width: thin;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  padding-left: 1em;
-  padding-right: 1em;
-}
-
-.timeline {
-  padding: 0;
-  margin: 0;
-  background-color: hsl(240, 10%, 85%);
-  border-style: solid;
-  border-width: thin;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  padding-left: 1em;
-  padding-right: 1em;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-}
-
-.timeline-prev-next {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-}
-
-/* Other */
-a:link {
-  color: hsl(220, 100%, 40%);
-  text-decoration: none;
-}
-a:visited {
-  color: hsl(280, 100%, 40%);
-  text-decoration: none;
-}
-a:hover {
-  color: hsl(220, 100%, 90%);
-  text-shadow: 2px 0px 1px hsl(220, 100%, 30%), -2px 0px 1px hsl(220, 100%, 30%), 0px 2px 1px hsl(220, 100%, 30%), 0px -2px 1px hsl(220, 100%, 30%),
-  1px 1px 0px hsl(220, 100%, 30%), 1px -1px 0px hsl(220, 100%, 30%), -1px 1px 0px hsl(220, 100%, 30%), -1px -1px 0px hsl(220, 100%, 30%);
-}
-
-hr {
-  border-style: solid;
-  border-width: thin;
-}
-
 /* Page specific */
 ul.recipient-list {
   padding: 0;
@@ -150,38 +172,15 @@ ul.recipient-list {
   display: inline-block;
 }
 
-li.actor-display {
+.actor-display {
   display: inline-block;
   border-style: solid;
   border-width: thin;
   padding: 0.1em;
   margin: 0;
-  margin-left: 0.5em;
-  margin-right: 0.5em;
-  background-color: hsl(240, 10%, 75%);
-}
-
-section.timeline-activity {
-  display: block;
-  border-style: solid;
-  border-width: thin;
-  margin: 0;
-  padding: 0.5em;
-  margin-top: 0.1em;
-  margin-bottom: 0.1em;
-  cursor: pointer;
-}
-section.timeline-activity:hover {
-  background-color: hsl(240, 10%, 75%);
-}
-
-section.actor-display {
-  display: inline-block;
-  margin: 0;
-  padding: 0.1em;
-  margin-left: 0.2em;
-  margin-right: 0.2em;
-  background-color: hsl(240, 10%, 75%);
+  margin-left: 0.1em;
+  margin-right: 0.1em;
+  background-color: hsl(240, 10%, 85%);
 }
 
 p {

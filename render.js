@@ -18,7 +18,7 @@ const Icons = {
 const Render = {
   // Render an actor in audience fields context
   audienceActor: function(actor) {
-    var display = '<section class="actor-display">'
+    var display = '<section style="display:inline-block;">'
     if (actor.valid) {
       const icon = actor.info.icon ? actor.info.icon : Icons['unknown-user']
       display = display + '<img src="' + icon + '" width="32" height="32" /> '
@@ -105,7 +105,7 @@ const UI = {
       if (UI.other_actor.urls.outbox) {
         UI.showTimeline(UI.other_actor.urls.outbox, undefined)
       } else {
-        UI.displayContentError('Actor does not have a public outbox.')
+        UI.displayError('Actor does not have a public outbox.')
         UI.showTimeline(undefined, undefined)
       }
     }
@@ -190,11 +190,17 @@ const UI = {
       // TO/CC
       Elem('send-message-to').innerHTML = UI.composed_message.to.map(
         function(element) {
-          return '<li class="actor-display">' + Render.audienceActor(element) + ' <button onclick="UI.removeToRecipient(\'' + element.urls.profile + '\')">×</button></li>'
+          return '<li class="actor-display">'
+          + Render.audienceActor(element)
+          + ' <button style="vertical-align:top;" onclick="UI.removeToRecipient(\'' + element.urls.profile + '\')">×</button>'
+          + '</li>'
         }).join('')
       Elem('send-message-cc').innerHTML = UI.composed_message.cc.map(
         function(element) {
-          return '<li class="actor-display">' + Render.audienceActor(element) + ' <button onclick="UI.removeCcRecipient(\'' + element.urls.profile + '\')">×</button></li>'
+          return '<li class="actor-display">'
+          + Render.audienceActor(element)
+          + ' <button style="vertical-align:top;" onclick="UI.removeCcRecipient(\'' + element.urls.profile + '\')">×</button>'
+          + '</li>'
         }).join('')
     }
   },
@@ -206,7 +212,7 @@ const UI = {
       function(load_ok, failure_message) {
         UI.onConnectionChange(load_ok)
         if (failure_message) {
-          UI.displayContentError(failure_message)
+          UI.displayError(failure_message)
         }
       })
   },
@@ -216,21 +222,14 @@ const UI = {
     UI.refresh_context[UI.current_context]()
   },
   // Display content errors
-  displayContentError: function(message) {
-    Elem('content-error').style.display = 'block'
-    Elem('content-error').innerText = 'Error: ' + message
-  },
-  // Display timeline errors
-  displayTimelineError: function(message) {
-    Elem('timeline-error').style.display = 'block'
-    Elem('timeline-error').innerText = 'Error: ' + message
+  displayError: function(message) {
+    Elem('error').style.display = 'block'
+    Elem('content-error').innerText = message
   },
   // Clear error messages
   clearError: function() {
-    Elem('content-error').style.display = 'none'
+    Elem('error').style.display = 'none'
     Elem('content-error').innerText = ''
-    Elem('timeline-error').style.display = 'none'
-    Elem('timeline-error').innerText = ''
   },
   // Show a page
   showPage: function(page, data) {
@@ -250,10 +249,8 @@ const UI = {
     if (url) {
       Elem('timeline').style.display = 'block'
       Elem('timeline-data').innerHTML = 'Loading collection...'
-      Elem('timeline-prev-top').style.display = 'none'
-      Elem('timeline-prev-bottom').style.display = 'none'
-      Elem('timeline-next-top').style.display = 'none'
-      Elem('timeline-next-bottom').style.display = 'none'
+      Elem('timeline-prev-top').disabled = true
+      Elem('timeline-next-top').disabled = true
       UI.timeline = new Timeline()
       UI.timeline.load(
         url,
@@ -266,15 +263,13 @@ const UI = {
               + '<strong>' + activity.actor.displayName() + '</strong></section>'
             }).join('')
             if (UI.timeline.prev) {
-              Elem('timeline-prev-top').style.display = 'block'
-              Elem('timeline-prev-bottom').style.display = 'block'
+              Elem('timeline-prev-top').disabled = false
             }
             if (UI.timeline.next) {
-              Elem('timeline-next-top').style.display = 'block'
-              Elem('timeline-next-bottom').style.display = 'block'
+              Elem('timeline-next-top').disabled = false
             }
           } else {
-            UI.displayTimelineError(failure_message)
+            UI.displayError(failure_message)
             Elem('timeline-data').innerHTML = ''
           }
         })
@@ -305,7 +300,7 @@ const UI = {
         if (load_ok) {
           UI.setContext('other-profile')
         } else {
-          UI.displayContentError('Unable to find user (' + failure_message + ')')
+          UI.displayError('Unable to find user (' + failure_message + ')')
         }
       })
   },
@@ -318,7 +313,7 @@ const UI = {
         if (load_ok) {
           UI.showPage('ask-password', undefined)
         } else {
-          UI.displayContentError(failure_message)
+          UI.displayError(failure_message)
         }
       })
   },
@@ -330,7 +325,7 @@ const UI = {
       function(load_ok, failure_message) {
         UI.onConnectionChange(load_ok)
         if (failure_message) {
-          UI.displayContentError(failure_message)
+          UI.displayError(failure_message)
         }
       })
   },
@@ -349,7 +344,7 @@ const UI = {
           UI.composed_message.addToRecipient(actor)
           UI.showPage('send-message', undefined)
         } else {
-          UI.displayContentError('Unable to find user (' + failure_message + ')')
+          UI.displayError('Unable to find user (' + failure_message + ')')
         }
       })
   },
@@ -363,7 +358,7 @@ const UI = {
           UI.composed_message.addCcRecipient(actor)
           UI.showPage('send-message', undefined)
         } else {
-          UI.displayContentError('Unable to find user (' + failure_message + ')')
+          UI.displayError('Unable to find user (' + failure_message + ')')
         }
       })
   },
@@ -394,7 +389,7 @@ const UI = {
         if (is_ok) {
           UI.showPage('send-message', undefined)
         } else {
-          UI.displayContentError('Error when sending message: ' + failure_message)
+          UI.displayError('Error when sending message: ' + failure_message)
         }
       })
   },

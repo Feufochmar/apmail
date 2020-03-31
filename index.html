@@ -8,10 +8,11 @@
     <script src="render.js"></script>
   </head>
   <body onload="UI.checkConnection()">
-    <nav id="tab-bar">
+    <!-- Navigation column -->
+    <nav id="tab-bar" class="column">
       <!-- Send page tab -->
       <input type="radio" id="send-selector" class="page" name="page" value="send" checked onchange="UI.setContext('send-message')" />
-      <label for="send-selector" class="page-label" id="send-selector-label">Send Message</label>
+      <label for="send-selector" class="page-label" id="send-selector-label">Write Note</label>
       <!-- Inbox tab -->
       <input type="radio" id="inbox-selector" class="page" name="page" value="inbox" onchange="UI.setContext('my-inbox')" />
       <label for="inbox-selector" class="page-label" id="inbox-selector-label">My Inbox</label>
@@ -24,28 +25,27 @@
       <!-- Lookup user box -->
       <nav class="page-label">
         <label for="lookup-actor" id="lookup-actor-label">Lookup Actor</label>
-        <input id="lookup-actor" type="text" placeholder="name@server"/>
+        <input id="lookup-actor" type="text" placeholder="name@server" />
         <button onclick="UI.lookupActor()">Search</button>
       </nav>
+      <!-- To display errors -->
+      <section id="error">
+        <span id="content-error"></span><br/>
+        <button onclick="UI.clearError();">×</button>
+      </section>
     </nav>
     <!-- Timelines -->
     <section id="timeline" style="display:none;">
-      <section id="timeline-error" class="error"></section>
-      <section class="timeline">
+      <section id="timeline-column" class="column">
         <section class="timeline-prev-next">
           <button id="timeline-prev-top" onclick="UI.prevTimeline();">Previous</button>
           <button id="timeline-next-top" onclick="UI.nextTimeline();">Next</button>
         </section>
         <section id="timeline-data"></section>
-        <section class="timeline-prev-next">
-          <button id="timeline-prev-bottom" onclick="UI.prevTimeline();">Previous</button>
-          <button id="timeline-next-bottom" onclick="UI.nextTimeline();">Next</button>
-        </section>
       </section>
     </section>
     <!-- Content pages -->
-    <section id="main-content">
-      <section id="content-error" class="error"></section>
+    <section id="main-content" class="column">
       <!-- Account selection page -->
       <main id="select-user" style="display:none;">
         <h2>Connection</h2>
@@ -85,7 +85,7 @@
         </section>
         <details>
           <summary>Show source</summary>
-          <textarea rows="30" cols="120" readonly id="profile-code-source">
+          <textarea rows="30" cols="80" readonly id="profile-code-source">
           </textarea>
         </details>
       </main>
@@ -106,7 +106,7 @@
             <p>Cc: <ul id="activity-cc" class="recipient-list"></ul></p>
           <details>
             <summary>Show source</summary>
-            <textarea rows="30" cols="120" readonly id="activity-code-source">
+            <textarea rows="30" cols="80" readonly id="activity-code-source">
             </textarea>
           </details>
         </details>
@@ -142,7 +142,7 @@
           </details>
           <details>
             <summary>Show source</summary>
-            <textarea rows="30" cols="120" readonly id="activity-object-code-source">
+            <textarea rows="30" cols="80" readonly id="activity-object-code-source">
             </textarea>
           </details>
         </section>
