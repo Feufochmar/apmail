@@ -76,18 +76,21 @@
           <span id="profile-icon"></span>
           <p style="display:inline-block;">
             <span id="profile-display-name"></span><br/>
-            <a id="profile-address"></a>
+            <a id="profile-address"></a><br/>
+            <span id="profile-type"></span>
           </p>
         </section>
-        <section>
+        <section class="actor-content">
           <p id="profile-summary">
           </p>
         </section>
         <details>
           <summary>Show source</summary>
-          <textarea rows="30" cols="80" readonly id="profile-code-source">
-          </textarea>
+          <p id="profile-code-source" class="code-source"></p>
         </details>
+        <section id="profile-controls-connected">
+          <button onclick="UI.disconnectUser();">Disconnect</button>
+        </section>
       </main>
       <!-- Show Activity page -->
       <main id="show-activity" style="display:none;">
@@ -106,8 +109,7 @@
             <p>Cc: <ul id="activity-cc" class="recipient-list"></ul></p>
           <details>
             <summary>Show source</summary>
-            <textarea rows="30" cols="80" readonly id="activity-code-source">
-            </textarea>
+            <p id="activity-code-source" class="code-source"></p>
           </details>
         </details>
         <!-- Object info -->
@@ -142,8 +144,7 @@
           </details>
           <details>
             <summary>Show source</summary>
-            <textarea rows="30" cols="80" readonly id="activity-object-code-source">
-            </textarea>
+            <p id="activity-object-code-source" class="code-source"></p>
           </details>
         </section>
       </main>
@@ -172,7 +173,7 @@
         <button onclick="UI.addCcRecipient()">Add</button><br/>
         <section id="send-message-recipient-error"></section>
         <h4>Message</h4>
-        <input id="send-message-subject" type="text" onchange="UI.updateSendContent()" size="80" placeholder="Subject (optional)"/> <br/>
+        <input id="send-message-subject" type="text" onchange="UI.updateSendContent()" size="80" placeholder="Summary (optional)"/> <br/>
         <textarea id="send-message-content" rows="20" cols="80" placeholder="What do you want to say ?" onchange="UI.updateSendContent()"></textarea> <br/>
         <button onclick="UI.sendMessage()">Send</button>
       </main>

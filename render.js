@@ -130,8 +130,15 @@ const UI = {
       Elem('profile-display-name').innerText = actor.displayName()
       Elem('profile-address').href = actor.urls.profile
       Elem('profile-address').innerText = actor.address()
+      Elem('profile-type').innerText = actor.info.type
       Elem('profile-summary').innerHTML = actor.info.summary
-      Elem('profile-code-source').value = JSON.stringify(actor.raw, null, 1)
+      Elem('profile-code-source').innerText = JSON.stringify(actor.raw, null, 1)
+      // Controls only shown if the actor is the connected user
+      if (actor.urls.profile === ConnectedUser.actor.urls.profile) {
+        Elem('profile-controls-connected').style.display = 'block';
+      } else {
+        Elem('profile-controls-connected').style.display = 'none';
+      }
     },
     'show-activity': function(activity) {
       // data contains the activity to display
@@ -150,7 +157,7 @@ const UI = {
         function(element) {
           return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
         }).join('')
-      Elem('activity-code-source').value = JSON.stringify(activity.raw, null, 1)
+      Elem('activity-code-source').innerText = JSON.stringify(activity.raw, null, 1)
       // Object of activity
       if (activity.object) {
         Elem('activity-object').style.display = 'block'
@@ -169,10 +176,11 @@ const UI = {
           function(element) {
             return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
           }).join('')
-        Elem('activity-object-code-source').value = JSON.stringify(activity.object.raw, null, 1)
+        Elem('activity-object-code-source').innerText = JSON.stringify(activity.object.raw, null, 1)
         Elem('activity-object-title').innerText = activity.object.title
         Elem('activity-object-summary').innerText = activity.object.summary
         Elem('activity-object-content').innerHTML = activity.object.content
+        // If there are attachments on the object, display them
         // Elem('activity-object-attachments')
         // Elem('activity-object-tags')
       } else {
@@ -328,6 +336,12 @@ const UI = {
           UI.displayError(failure_message)
         }
       })
+  },
+  // Action on the profile page
+  disconnectUser: function() {
+    // Disconnect the user
+    ConnectedUser.disconnect()
+    UI.onConnectionChange(false)
   },
   // Action on the send page
   // Update visibility
