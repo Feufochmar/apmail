@@ -41,11 +41,11 @@ Timeline.prototype = {
           this.next = answer.next
           this.parseActivities(answer.orderedItems, token, callback)
         } else {
-          callback(false, 'Timeline: unexpected answer from server')
+          callback(false, 'Unexpected answer from server when fetching activity collection.')
           console.log(answer)
         }
       } else if (request.readyState == 4) {
-        callback(false, 'Timeline: server error')
+        callback(false, 'Server error (' + request.status + ') when fetching activity collection.')
       }
     }.bind(this)
     request.open('GET', url, true)
@@ -57,6 +57,12 @@ Timeline.prototype = {
     request.send()
   },
   parseActivities: function(raw_activities, token, callback) {
+    // raw_activities must be an array
+    if (!Array.isArray(raw_activities)) {
+      console.log(raw_activities)
+      callback(false, 'Unexpected format for activity collection.')
+      return
+    }
     // Get the next activity
     const raw_act = raw_activities.shift()
     if (raw_act && typeof raw_act === 'string') {
