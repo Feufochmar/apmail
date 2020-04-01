@@ -11,7 +11,47 @@ const Elem = function(id) {
 
 // Icon list
 const Icons = {
-  'unknown-user': "img/unknown-user.svg"
+  // Fallback icons
+  fallback: {
+    // Misc
+    'user': "img/unknown-user.svg",
+    'activity': "img/unknown-activity.svg",
+  },
+  // ActivityStream vocabulary: Activities
+  vocabulary_activity: {
+    'Accept': 'img/accept.svg',
+    'Add': 'img/add.svg',
+    'Announce': 'img/announce.svg',
+//    'Arrive': 'img/arrive.svg',
+    'Block': 'img/block.svg',
+    'Create': 'img/create.svg',
+    'Delete': 'img/delete.svg',
+    'Dislike': 'img/dislike.svg',
+    'Flag': 'img/flag.svg',
+    'Follow': 'img/follow.svg',
+    'Ignore': 'img/ignore.svg',
+//    'Invite': 'img/invite.svg',
+//    'Join': 'img/join.svg',
+//    'Leave': 'img/leave.svg',
+    'Like': 'img/like.svg',
+//    'Listen': 'img/listen.svg',
+//    'Move': 'img/move.svg',
+//    'Offer': 'img/offer.svg',
+    'Question': 'img/question.svg',
+    'Reject': 'img/reject.svg',
+//    'Read': 'img/read.svg',
+    'Remove': 'img/remove.svg',
+    'TentativeReject': 'img/reject.svg',
+    'TentativeAccept': 'img/accept.svg',
+//    'Travel': 'img/travel.svg',
+//    'Undo': 'img/undo.svg',
+//    'Update': 'img/update.svg',
+//    'View': 'img/view.svg'
+  },
+  // Get activity icon from its type
+  activity: function(type) {
+    return Icons.vocabulary_activity[type] ? Icons.vocabulary_activity[type] : Icons.fallback['activity']
+  }
 }
 
 // To render elements that cannot be present in index.html from a model element
@@ -20,14 +60,14 @@ const Render = {
   audienceActor: function(actor) {
     var display = '<section style="display:inline-block;">'
     if (actor.valid) {
-      const icon = actor.info.icon ? actor.info.icon : Icons['unknown-user']
+      const icon = actor.info.icon ? actor.info.icon : Icons.fallback['user']
       display = display + '<img src="' + icon + '" width="32" height="32" /> '
       + '<p style="display:inline-block;"><strong>' + actor.displayName() + '</strong> <br/>'
       + '<a href="' + actor.urls.profile + '">'
       + actor.address()
       + '</a></p>'
     } else {
-      display = display + '<img src="' + Icons['unknown-user'] + '" width="32" height="32" /> '
+      display = display + '<img src="' + Icons.fallback['user'] + '" width="32" height="32" /> '
       + '<p style="display:inline-block;">'
       + '<a href="' + actor.urls.profile + '">'
       + 'Other actor'
@@ -142,7 +182,7 @@ const UI = {
     },
     'ask-password': function(_) {
       Elem('connect-password').value = ''
-      const icon = ConnectedUser.actor.info.icon ? ConnectedUser.actor.info.icon : Icons['unknown-user']
+      const icon = ConnectedUser.actor.info.icon ? ConnectedUser.actor.info.icon : Icons.fallback['user']
       Elem('ask-password-user-icon').innerHTML = '<img src="' + icon + '" width="32" height="32" />'
       Elem('ask-password-user-display-name').innerText = ConnectedUser.actor.displayName()
       Elem('ask-password-user-address').href = ConnectedUser.actor.urls.profile
@@ -150,7 +190,7 @@ const UI = {
     },
     'show-profile': function(actor) {
       // data contains the actor to display
-      const icon = actor.info.icon ? actor.info.icon : Icons['unknown-user']
+      const icon = actor.info.icon ? actor.info.icon : Icons.fallback['user']
       Elem('profile-icon').innerHTML = '<img src="' + icon + '" width="96" height="96" />'
       Elem('profile-display-name').innerText = actor.displayName()
       Elem('profile-address').href = actor.urls.profile
@@ -169,7 +209,7 @@ const UI = {
       // data contains the activity to display
       Elem('activity-type').innerText = activity.type
       Elem('activity-published').innerText = activity.published ? activity.published.toLocaleString() : ''
-      const icon = activity.actor.info.icon ? activity.actor.info.icon : Icons['unknown-user']
+      const icon = activity.actor.info.icon ? activity.actor.info.icon : Icons.fallback['user']
       Elem('activity-actor-icon').innerHTML = '<img src="' + icon + '" width="48" height="48" />'
       Elem('activity-actor-display-name').innerText = activity.actor.displayName()
       Elem('activity-actor-address').innerText = activity.actor.address()
@@ -188,7 +228,7 @@ const UI = {
         Elem('activity-object').style.display = 'block'
         Elem('activity-object-type').innerText = activity.object.type
         Elem('activity-object-published').innerText = activity.object.published ? activity.object.published.toLocaleString() : ''
-        const icon = activity.object.actor.info.icon ? activity.object.actor.info.icon : Icons['unknown-user']
+        const icon = activity.object.actor.info.icon ? activity.object.actor.info.icon : Icons.fallback['user']
         Elem('activity-object-actor-icon').innerHTML = '<img src="' + icon + '" width="48" height="48" />'
         Elem('activity-object-actor-display-name').innerText = activity.object.actor.displayName()
         Elem('activity-object-actor-address').innerText = activity.object.actor.address()
@@ -295,8 +335,12 @@ const UI = {
           if (load_ok) {
             Elem('timeline-data').innerHTML = UI.timeline.activities.map(function(activity) {
               return '<section class="timeline-activity" onclick="UI.showActivity(\'' + activity.id + '\');">'
-              + activity.type + ' Activity<br/>'
-              + '<strong>' + activity.actor.displayName() + '</strong></section>'
+              + '<img src="' + Icons.activity(activity.type) + '" width="32" height="32"> '
+              + '<p style="display:inline-block;">'
+              + '<strong>' + activity.type
+              + ((activity.object && activity.object.type) ? ' (' + activity.object.type + ')' : '')
+              + '</strong><br/>'
+              + activity.actor.displayName() + '</p></section>'
             }).join('')
             if (UI.timeline.prev) {
               Elem('timeline-prev-top').disabled = false
