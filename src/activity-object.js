@@ -7,7 +7,7 @@ const ASObject = function(raw_object) {
   this.id = raw_object.id
   this.type = raw_object.type
   this.published = raw_object.published ? new Date(raw_object.published) : undefined
-  this.title = raw_object.title ? raw_object.title : ''
+  this.name = raw_object.name ? raw_object.name : ''
   this.summary = raw_object.summary ? raw_object.summary : ''
   this.content = raw_object.content ? raw_object.content : ''
   // actor, to, cc are filled in loadActors

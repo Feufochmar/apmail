@@ -242,8 +242,8 @@ const UI = {
             return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
           }).join('')
         Elem('activity-object-code-source').innerText = JSON.stringify(activity.object.raw, null, 1)
-        Elem('activity-object-title').innerText = activity.object.title
-        Elem('activity-object-summary').innerText = activity.object.summary
+        Elem('activity-object-name').innerText = activity.object.name
+        Elem('activity-object-summary').innerHTML = activity.object.summary
         Elem('activity-object-content').innerHTML = activity.object.content
         // If there are attachments on the object, display them
         Elem('activity-object-attachments-number').innerText = activity.object.attachments.length
