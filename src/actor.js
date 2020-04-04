@@ -1,42 +1,22 @@
+const {Fetcher, ASActor} = require('./activity-vocabulary.js')
+
 // Actor class
-// ActorInfo structure
-var ActorInfo = function() {}
-ActorInfo.prototype = {
-  display_name: undefined,
-  summary: undefined,
-  icon: undefined,
-  type: undefined
-}
-// ActorUrls structure
-var ActorUrls = function() {}
-ActorUrls.prototype = {
-  profile: undefined,
-  outbox: undefined,
-  inbox: undefined,
-  followers: undefined,
-  following: undefined,
-  oauth_token: undefined,
-  oauth_registration: undefined,
-  oauth_authorization: undefined
-}
-// Actor structure
-var Actor = function() {
-  this.info = new ActorInfo()
-  this.urls = new ActorUrls()
-}
+// Add additional services around an ASActor
+const Actor = function() {}
+// Prototype
 Actor.prototype = {
   // Attributes
-  name: undefined,
-  server: undefined,
-  info: undefined,
-  urls: undefined,
-  raw: undefined,
+  data: undefined, // ASActor
+  name: undefined, // Name of actor, should correspond to data.preferredUsername if data is present
+  server: undefined, // Server of the actor, for use of name@server style
   valid: false,
   // Methods
   // Get the name used for display
   displayName: function() {
-    if (this.info.display_name) {
-      return this.info.display_name
+    if (this.data && this.data.name) {
+      return this.data.name
+    } else if (this.data && this.data.preferredUsername) {
+      return this.data.preferredUsername
     } else {
       return this.name
     }
@@ -44,6 +24,14 @@ Actor.prototype = {
   // Get the address
   address: function() {
     return this.name + '@' + this.server
+  },
+  // Get the icon, or a default icon
+  iconUrl: function(default_icon) {
+    if (this.data && this.data.icon && this.data.icon.url) {
+      return this.data.icon.url
+    } else {
+      return default_icon
+    }
   },
   // Load from a "name@server" address.
   // Callback is a function accepting two arguments:
@@ -88,61 +76,37 @@ Actor.prototype = {
     request.open('GET', 'https://' + this.server + '/.well-known/webfinger' + '?resource=acct:' + address, true)
     request.send()
   },
-  // Indicate if the type is compatible with an actor
-  isExpectedActorType: function(actorType) {
-    return (actorType === 'Application') || (actorType === 'Group') || (actorType === 'Organization') || (actorType === 'Person') || (actorType === 'Service')
-  },
   // Load from the link identifying the account
   // Callback is a function accepting two arguments:
   // - a boolean indicating if the loading is complete or in failure,
   // - a string indicating the failure
   loadFromProfileUrl: function(profile_url, callback) {
-    this.urls.profile = profile_url
-    // Use ActivityPub protocol to get the user infos
-    const request = new XMLHttpRequest()
-    request.onreadystatechange = function() {
-      if (request.readyState == 4 && request.status == 200) {
-        const answer = JSON.parse(request.responseText)
-        if (answer && this.isExpectedActorType(answer.type)) {
-          this.raw = answer
-          // name and server are previously filled if called from loadFromNameAndServer
-          if (!this.name) {
-            this.name = answer.preferredUsername
-          }
-          if (!this.server) {
-            this.server = profile_url.replace('http://', '').replace('https://', '').split(/[/?#]/)[0]
-          }
-          if (answer.name) {
-            this.info.display_name = answer.name
-          } else {
-            this.info.display_name = this.name
-          }
-          this.info.summary = answer.summary ? answer.summary : ""
-          this.info.icon = answer.icon ? answer.icon.url : undefined
-          this.info.type = answer.type
-          this.urls.outbox = answer.outbox
-          this.urls.inbox = answer.inbox
-          this.urls.followers = answer.followers
-          this.urls.following = answer.following
-          if (answer.endpoints) {
-            this.urls.oauth_token = answer.endpoints.oauthTokenEndpoint
-            this.urls.oauth_registration = answer.endpoints.oauthRegistrationEndpoint
-            this.urls.oauth_authorization = answer.endpoints.oauthAuthorizationEndpoint
-          }
-          this.valid = true
-          callback(true, undefined)
-        } else {
-          callback(false, 'user profile: incorrect response from server')
-          console.log(answer)
-        }
-      } else if (request.readyState == 4) {
-        callback(false, 'user profile: server error')
+    // Fetch the activity actor
+    Fetcher.get(profile_url, undefined, function(load_ok, fetched_actor, failure_message) {
+      if (load_ok) {
+        this.data = fetched_actor
+        // Fetch a few properties
+        this.data.fetchAttributeList(
+          ['preferredUsername', 'name', 'summary', 'icon', 'endpoints'],
+          undefined,
+          function (ok, error) {
+            if (ok) {
+              if (!this.name) {
+                this.name = this.data.preferredUsername
+              }
+              if (!this.server) {
+                this.server = profile_url.replace('http://', '').replace('https://', '').split(/[/?#]/)[0]
+              }
+              this.valid = true
+              callback(true, undefined)
+            } else {
+              callback(false, error)
+            }
+          }.bind(this))
+      } else {
+        callback(false, failure_message)
       }
-    }.bind(this)
-    request.open('GET', profile_url, true)
-    request.setRequestHeader('Content-Type', 'application/activity+json')
-    request.setRequestHeader('Accept', 'application/activity+json')
-    request.send()
+    }.bind(this))
   },
   // Fill the values of actor from fixed data
   // Usefull for displaying non-actors appearing in audience fields
@@ -150,8 +114,9 @@ Actor.prototype = {
     this.valid = true
     this.name = name
     this.server = server
-    this.info.display_name = display_name
-    this.urls.profile = url
+    this.data = new ASActor()
+    this.data.id = url
+    this.data.name = display_name
   }
 }
 

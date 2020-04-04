@@ -101,7 +101,7 @@ const ConnectedUser = {
             callback(false, 'OAuth: server error when registering client.')
           }
         }
-        request.open('POST', ConnectedUser.actor.urls.oauth_registration, true)
+        request.open('POST', ConnectedUser.actor.data.endpoints.oauthRegistrationEndpoint, true)
         var data = new URLSearchParams()
         data.append('client_name', 'AP.Mail client')
         data.append('redirect_uris', 'urn:ietf:wg:oauth:2.0:oob')
@@ -129,7 +129,7 @@ const ConnectedUser = {
         callback(false, 'OAuth: cannot get user tokens')
       }
     }
-    request.open('POST', ConnectedUser.actor.urls.oauth_token, true)
+    request.open('POST', ConnectedUser.actor.data.endpoints.oauthTokenEndpoint, true)
     var data = new URLSearchParams()
     data.append('client_id', ConnectedUser.tokens.server.client_id)
     data.append('client_secret', ConnectedUser.tokens.server.client_secret)

@@ -60,16 +60,15 @@ const Render = {
   audienceActor: function(actor) {
     var display = '<section style="display:inline-block;">'
     if (actor.valid) {
-      const icon = actor.info.icon ? actor.info.icon : Icons.fallback['user']
-      display = display + '<img src="' + icon + '" width="32" height="32" /> '
+      display = display + '<img src="' + actor.iconUrl(Icons.fallback['user']) + '" width="32" height="32" /> '
       + '<p style="display:inline-block;"><strong>' + actor.displayName() + '</strong> <br/>'
-      + '<a href="' + actor.urls.profile + '">'
+      + '<a href="' + actor.data.id + '">'
       + actor.address()
       + '</a></p>'
     } else {
       display = display + '<img src="' + Icons.fallback['user'] + '" width="32" height="32" /> '
       + '<p style="display:inline-block;">'
-      + '<a href="' + actor.urls.profile + '">'
+      + '<a href="' + actor.data.id + '">'
       + 'Other actor'
       + '</a></p>'
     }
@@ -138,7 +137,7 @@ const UI = {
     'my-inbox': function() {
       UI.updateNav('inbox-selector')
       if (UI.is_connected) {
-        UI.showTimeline(ConnectedUser.actor.urls.inbox, ConnectedUser.tokens.user.access_token)
+        UI.showTimeline(ConnectedUser.actor.data.inbox, ConnectedUser.tokens.user.access_token)
         UI.showPage('show-profile', ConnectedUser.actor)
       } else {
         UI.showTimeline(undefined, undefined)
@@ -148,7 +147,7 @@ const UI = {
     'my-outbox': function() {
       UI.updateNav('outbox-selector')
       if (UI.is_connected) {
-        UI.showTimeline(ConnectedUser.actor.urls.outbox, ConnectedUser.tokens.user.access_token)
+        UI.showTimeline(ConnectedUser.actor.data.outbox, ConnectedUser.tokens.user.access_token)
         UI.showPage('show-profile', ConnectedUser.actor)
       } else {
         UI.showTimeline(undefined, undefined)
@@ -167,8 +166,8 @@ const UI = {
     'other-profile': function() {
       UI.updateNav(undefined)
       UI.showPage('show-profile', UI.other_actor)
-      if (UI.other_actor.urls.outbox) {
-        UI.showTimeline(UI.other_actor.urls.outbox, undefined)
+      if (UI.other_actor.data.outbox) {
+        UI.showTimeline(UI.other_actor.data.outbox, undefined)
       } else {
         UI.displayError('Actor does not have a public outbox.')
         UI.showTimeline(undefined, undefined)
@@ -182,24 +181,22 @@ const UI = {
     },
     'ask-password': function(_) {
       Elem('connect-password').value = ''
-      const icon = ConnectedUser.actor.info.icon ? ConnectedUser.actor.info.icon : Icons.fallback['user']
-      Elem('ask-password-user-icon').innerHTML = '<img src="' + icon + '" width="32" height="32" />'
+      Elem('ask-password-user-icon').innerHTML = '<img src="' + ConnectedUser.actor.iconUrl(Icons.fallback['user']) + '" width="32" height="32" />'
       Elem('ask-password-user-display-name').innerText = ConnectedUser.actor.displayName()
-      Elem('ask-password-user-address').href = ConnectedUser.actor.urls.profile
+      Elem('ask-password-user-address').href = ConnectedUser.actor.data.id
       Elem('ask-password-user-address').innerText = ConnectedUser.actor.address()
     },
     'show-profile': function(actor) {
       // data contains the actor to display
-      const icon = actor.info.icon ? actor.info.icon : Icons.fallback['user']
-      Elem('profile-icon').innerHTML = '<img src="' + icon + '" width="96" height="96" />'
+      Elem('profile-icon').innerHTML = '<img src="' + actor.iconUrl(Icons.fallback['user']) + '" width="96" height="96" />'
       Elem('profile-display-name').innerText = actor.displayName()
-      Elem('profile-address').href = actor.urls.profile
+      Elem('profile-address').href = actor.data.id
       Elem('profile-address').innerText = actor.address()
-      Elem('profile-type').innerText = actor.info.type
-      Elem('profile-summary').innerHTML = actor.info.summary
-      Elem('profile-code-source').innerText = JSON.stringify(actor.raw, null, 1)
+      Elem('profile-type').innerText = actor.data.type
+      Elem('profile-summary').innerHTML = actor.data.summary
+      Elem('profile-code-source').innerText = JSON.stringify(actor.data._raw, null, 1)
       // Controls only shown if the actor is the connected user
-      if (actor.urls.profile === ConnectedUser.actor.urls.profile) {
+      if (actor.data.id === ConnectedUser.actor.data.id) {
         Elem('profile-controls-connected').style.display = 'block';
       } else {
         Elem('profile-controls-connected').style.display = 'none';
@@ -209,11 +206,10 @@ const UI = {
       // data contains the activity to display
       Elem('activity-type').innerText = activity.type
       Elem('activity-published').innerText = activity.published ? activity.published.toLocaleString() : ''
-      const icon = activity.actor.info.icon ? activity.actor.info.icon : Icons.fallback['user']
-      Elem('activity-actor-icon').innerHTML = '<img src="' + icon + '" width="48" height="48" />'
+      Elem('activity-actor-icon').innerHTML = '<img src="' + activity.actor.iconUrl(Icons.fallback['user']) + '" width="48" height="48" />'
       Elem('activity-actor-display-name').innerText = activity.actor.displayName()
       Elem('activity-actor-address').innerText = activity.actor.address()
-      Elem('activity-actor-address').href = activity.actor.urls.profile
+      Elem('activity-actor-address').href = activity.actor.data.id
       Elem('activity-to').innerHTML = activity.to.map(
         function(element) {
           return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
@@ -228,11 +224,10 @@ const UI = {
         Elem('activity-object').style.display = 'block'
         Elem('activity-object-type').innerText = activity.object.type
         Elem('activity-object-published').innerText = activity.object.published ? activity.object.published.toLocaleString() : ''
-        const icon = activity.object.actor.info.icon ? activity.object.actor.info.icon : Icons.fallback['user']
-        Elem('activity-object-actor-icon').innerHTML = '<img src="' + icon + '" width="48" height="48" />'
+        Elem('activity-object-actor-icon').innerHTML = '<img src="' + activity.object.actor.iconUrl(Icons.fallback['user']) + '" width="48" height="48" />'
         Elem('activity-object-actor-display-name').innerText = activity.object.actor.displayName()
         Elem('activity-object-actor-address').innerText = activity.object.actor.address()
-        Elem('activity-object-actor-address').href = activity.object.actor.urls.profile
+        Elem('activity-object-actor-address').href = activity.object.actor.data.id
         Elem('activity-object-to').innerHTML = activity.object.to.map(
           function(element) {
             return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
@@ -268,14 +263,14 @@ const UI = {
         function(element) {
           return '<li class="actor-display">'
           + Render.audienceActor(element)
-          + ' <button style="vertical-align:top;" onclick="UI.removeToRecipient(\'' + element.urls.profile + '\')">×</button>'
+          + ' <button style="vertical-align:top;" onclick="UI.removeToRecipient(\'' + element.data.id + '\')">×</button>'
           + '</li>'
         }).join('')
       Elem('send-message-cc').innerHTML = UI.composed_message.cc.map(
         function(element) {
           return '<li class="actor-display">'
           + Render.audienceActor(element)
-          + ' <button style="vertical-align:top;" onclick="UI.removeCcRecipient(\'' + element.urls.profile + '\')">×</button>'
+          + ' <button style="vertical-align:top;" onclick="UI.removeCcRecipient(\'' + element.data.id + '\')">×</button>'
           + '</li>'
         }).join('')
     }
@@ -452,7 +447,7 @@ const UI = {
   removeToRecipient: function(url_profile) {
     // Don't fetch the actor, only set the profile url used in removal
     const actor = new Actor()
-    actor.urls.profile = url_profile
+    actor.data.id = url_profile
     UI.composed_message.removeToRecipient(actor)
     UI.showPage('send-message', undefined)
   },
@@ -460,7 +455,7 @@ const UI = {
   removeCcRecipient: function(url_profile) {
     // Don't fetch the actor, only set the profile url used in removal
     const actor = new Actor()
-    actor.urls.profile = url_profile
+    actor.data.id = url_profile
     UI.composed_message.removeCcRecipient(actor)
     UI.showPage('send-message', undefined)
   },

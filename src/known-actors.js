@@ -11,10 +11,10 @@ const KnownActors = {
   set: function(profile, actor) {
     KnownActors.actors[profile] = actor
     // Make a false actor for followers
-    if (actor.urls.followers) {
+    if (actor.data.followers) {
       const followers = new Actor()
-      followers.fromDummyData(actor.address(), 'followers', 'Followers of ' + actor.displayName(), actor.urls.followers)
-      KnownActors.actors[actor.urls.followers] = followers;
+      followers.fromDummyData(actor.address(), 'followers', 'Followers of ' + actor.displayName(), actor.data.followers)
+      KnownActors.actors[actor.data.followers] = followers;
     }
   },
   // Retrieve an actor
@@ -37,7 +37,7 @@ const KnownActors = {
 // A representation of "everyone" in Actor class
 const publicActor = new Actor()
 publicActor.fromDummyData('', 'public', 'Anyone', 'https://www.w3.org/ns/activitystreams#Public')
-KnownActors.set(publicActor.urls.profile, publicActor)
+KnownActors.set(publicActor.data.id, publicActor)
 
 // Exported structures
 exports.KnownActors = KnownActors
