@@ -2,9 +2,8 @@ const {Actor} = require('./actor.js')
 const {KnownActors} = require('./known-actors.js')
 
 // ActivityObject class: wrapper around an Object of the ActivityStream spec
-const ActivityObject = function(as_object, token) {
+const ActivityObject = function(as_object) {
   this.data = as_object
-  this.token = token
   // Those should be available
   this.id = this.data.id
   this.type = this.data.type
@@ -31,7 +30,6 @@ ActivityObject.prototype = {
     // Fetch attributes
     this.data.fetchAttributeList(
       ['attributedTo', 'attachment'],
-      this.token,
       function (load_ok, failure_message) {
         if (load_ok) {
           // Actor
@@ -85,7 +83,7 @@ ActivityObject.prototype = {
       var err = error_msg
       if (typeof act === 'string') {
         // string => id of actor
-        KnownActors.retrieve(act, undefined, function (load_ok, actor, failure_message) {
+        KnownActors.retrieve(act, function (load_ok, actor, failure_message) {
           if (load_ok) {
             to.push(actor)
           } else {

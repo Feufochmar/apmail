@@ -133,7 +133,7 @@ const UI = {
     'my-inbox': function() {
       UI.updateNav('inbox-selector')
       if (UI.is_connected) {
-        UI.showTimeline(ConnectedUser.actor.data.inbox, ConnectedUser.tokens.user.access_token)
+        UI.showTimeline(ConnectedUser.actor.data.inbox)
         UI.showPage('show-profile', ConnectedUser.actor)
       } else {
         UI.showTimeline(undefined, undefined)
@@ -143,7 +143,7 @@ const UI = {
     'my-outbox': function() {
       UI.updateNav('outbox-selector')
       if (UI.is_connected) {
-        UI.showTimeline(ConnectedUser.actor.data.outbox, ConnectedUser.tokens.user.access_token)
+        UI.showTimeline(ConnectedUser.actor.data.outbox)
         UI.showPage('show-profile', ConnectedUser.actor)
       } else {
         UI.showTimeline(undefined, undefined)
@@ -312,7 +312,7 @@ const UI = {
     UI.refresh_page[page](data)
   },
   // Show the timeline
-  showTimeline: function(url, token) {
+  showTimeline: function(url) {
     if (url) {
       Elem('timeline').style.display = 'block'
       Elem('timeline-data').innerHTML = 'Loading collection...'
@@ -321,7 +321,6 @@ const UI = {
       UI.timeline = new Timeline()
       UI.timeline.load(
         url,
-        token,
         function(load_ok, failure_message) {
           if (load_ok) {
             Elem('timeline-data').innerHTML = UI.timeline.activities.map(function(activity) {
@@ -473,12 +472,12 @@ const UI = {
   // Timeline navigation
   nextTimeline: function() {
     if (UI.timeline.next) {
-      UI.showTimeline(UI.timeline.next, UI.timeline.token)
+      UI.showTimeline(UI.timeline.next)
     }
   },
   prevTimeline: function() {
     if (UI.timeline.prev) {
-      UI.showTimeline(UI.timeline.prev, UI.timeline.token)
+      UI.showTimeline(UI.timeline.prev)
     }
   },
   // Show contents of activities

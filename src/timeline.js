@@ -25,23 +25,20 @@ Timeline.prototype = {
   prev: undefined,
   // Link to next page
   next: undefined,
-  // Token used when loading -- for loading prev/next within the same context
-  token: undefined,
   // Load a timeline from a url
-  load: function(url, token, callback) {
-    this.token = token
+  load: function(url, callback) {
     // A timeline must be reloaded each time
-    Fetcher.refresh(url, token, function(load_ok, fetched_timeline, failure_message) {
+    Fetcher.refresh(url, function(load_ok, fetched_timeline, failure_message) {
       if (load_ok) {
         if (fetched_timeline.type === 'OrderedCollection' && fetched_timeline.first) {
           // Collection is paginated
           // Fetch the attribute
-          fetched_timeline.fetchAttribute('first', token, function (ok, error) {
+          fetched_timeline.fetchAttribute('first', function (ok, error) {
             if (load_ok) {
               this.activities = []
               this.prev = fetched_timeline.prev
               this.next = fetched_timeline.next
-              this.parsePage(fetched_timeline.first, token, callback)
+              this.parsePage(fetched_timeline.first, callback)
             } else {
               callback(false, error)
             }
@@ -51,12 +48,12 @@ Timeline.prototype = {
           this.activities = []
           this.prev = fetched_timeline.prev
           this.next = fetched_timeline.next
-          this.parsePage(fetched_timeline, token, callback)
+          this.parsePage(fetched_timeline, callback)
         } else if (fetched_timeline.type === 'OrderedCollectionPage') {
           this.activities = []
           this.prev = fetched_timeline.prev
           this.next = fetched_timeline.next
-          this.parsePage(fetched_timeline, token, callback)
+          this.parsePage(fetched_timeline, callback)
         } else {
           callback(false, 'Unexpected answer from server when fetching activity collection.')
           console.log(answer)
@@ -67,25 +64,25 @@ Timeline.prototype = {
       }
     }.bind(this))
   },
-  parsePage: function (collectionPage, token, callback) {
+  parsePage: function (collectionPage, callback) {
     // Fetch attributes of collectionPage
-    collectionPage.fetchAttribute('orderedItems', token, function (load_ok, failure_message) {
+    collectionPage.fetchAttribute('orderedItems', function (load_ok, failure_message) {
       if (load_ok) {
         // Elements of the page have been fetched
         // For each, convert them to Activity and put them in this.activities
-        this.addActivity(collectionPage.orderedItems.values(), token, callback, '')
+        this.addActivity(collectionPage.orderedItems.values(), callback, '')
       } else {
         callback(false, failure_message)
       }
     }.bind(this))
   },
-  addActivity: function (iter, token, callback, error_msg) {
+  addActivity: function (iter, callback, error_msg) {
     const next = iter.next()
     if (next.done) {
       callback(true, error_msg === '' ? undefined : error_msg)
     } else {
       var err = error_msg
-      const act = new Activity(next.value, token)
+      const act = new Activity(next.value)
       act.loadNeeded(function (load_ok, failure_message) {
         if (!load_ok) {
           err = err + failure_message + '<br/>'
@@ -95,7 +92,7 @@ Timeline.prototype = {
         // Store in known activities
         KnownActivities.set(act.id, act)
         // next
-        this.addActivity(iter, token, callback, err)
+        this.addActivity(iter, callback, err)
       }.bind(this))
     }
   }

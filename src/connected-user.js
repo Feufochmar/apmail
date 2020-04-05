@@ -1,3 +1,4 @@
+const {TokenCollection} = require('./token-collection.js')
 const {Actor} = require('./actor.js')
 
 // Connected user structure
@@ -27,6 +28,8 @@ const ConnectedUser = {
       ConnectedUser.tokens.user.access_token = window.localStorage.getItem('access_token:' + user_name + '@' + server_name)
       // Load the rest with webfinger / activity pub requests
       ConnectedUser.actor.loadFromNameServerAddress(user_name + '@' + server_name, callback)
+      // Set the token to use when connecting to the server
+      TokenCollection.set(server_name, ConnectedUser.tokens.user.access_token)
     } else {
       callback(false, 'user not connected')
     }
@@ -44,6 +47,8 @@ const ConnectedUser = {
     if (ConnectedUser.actor.name && ConnectedUser.actor.server) {
       window.localStorage.removeItem('refresh_token:' + ConnectedUser.actor.name + '@' + ConnectedUser.actor.server)
       window.localStorage.removeItem('access_token:' + ConnectedUser.actor.name + '@' + ConnectedUser.actor.server)
+      // Unset the token to use when connecting to the server
+      TokenCollection.set(ConnectedUser.actor.server, undefined)
     }
     window.localStorage.removeItem('last:server.name')
     window.localStorage.removeItem('last:user.name')
@@ -123,6 +128,8 @@ const ConnectedUser = {
         ConnectedUser.tokens.user.access_token = answer.access_token
         // Save the tokens
         ConnectedUser.saveToLocalStorage()
+        //
+        TokenCollection.set(ConnectedUser.actor.server, ConnectedUser.tokens.user.access_token)
         // OK, return to callback
         callback(true, undefined)
       } else if (request.readyState == 4) {

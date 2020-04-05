@@ -82,7 +82,7 @@ Actor.prototype = {
   // - a string indicating the failure
   loadFromProfileUrl: function(profile_url, callback) {
     // Fetch the activity actor
-    Fetcher.get(profile_url, undefined, function(load_ok, fetched_actor, failure_message) {
+    Fetcher.get(profile_url, function(load_ok, fetched_actor, failure_message) {
       if (load_ok) {
         this.loadFromASActor(fetched_actor, callback)
       } else {
@@ -97,7 +97,6 @@ Actor.prototype = {
     // Fetch a few properties
     this.data.fetchAttributeList(
       ['preferredUsername', 'name', 'summary', 'icon', 'endpoints'],
-      undefined,
       function (ok, error) {
         if (ok) {
           if (!this.name) {

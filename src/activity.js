@@ -3,9 +3,8 @@ const {KnownActors} = require('./known-actors.js')
 const {ActivityObject} = require('./activity-object.js')
 
 // Activity class
-const Activity = function (as_activity, token) {
+const Activity = function (as_activity) {
   this.data = as_activity
-  this.token = token
   // Those should be available
   this.id = this.data.id
   this.type = this.data.type
@@ -26,12 +25,11 @@ Activity.prototype = {
     // actor, object
     this.data.fetchAttributeList(
       ['actor', 'object'],
-      this.token,
       function (load_ok, failure_message) {
         if (load_ok) {
           // Object
           if (this.data.object) {
-            this.object = new ActivityObject(this.data.object, this.token)
+            this.object = new ActivityObject(this.data.object)
           } else {
             this.object = undefined
           }
@@ -103,7 +101,7 @@ Activity.prototype = {
       var err = error_msg
       if (typeof act === 'string') {
         // string => id of actor
-        KnownActors.retrieve(act, undefined, function (load_ok, actor, failure_message) {
+        KnownActors.retrieve(act, function (load_ok, actor, failure_message) {
           if (load_ok) {
             to.push(actor)
           } else {
