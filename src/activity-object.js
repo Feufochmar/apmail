@@ -1,155 +1,114 @@
 const {Actor} = require('./actor.js')
 const {KnownActors} = require('./known-actors.js')
 
-// ASObject class: represent of Object of the ActivityStream spec
-const ASObject = function(raw_object) {
-  this.raw = raw_object
-  this.id = raw_object.id
-  this.type = raw_object.type
-  this.published = raw_object.published ? new Date(raw_object.published) : undefined
-  this.name = raw_object.name ? raw_object.name : ''
-  this.summary = raw_object.summary ? raw_object.summary : ''
-  this.content = raw_object.content ? raw_object.content : ''
-  // actor, to, cc are filled in loadActors
+// ActivityObject class: wrapper around an Object of the ActivityStream spec
+const ActivityObject = function(as_object, token) {
+  this.data = as_object
+  this.token = token
+  // Those should be available
+  this.id = this.data.id
+  this.type = this.data.type
+  this.published = this.data.published ? new Date(this.data.published) : undefined
+  this.name = this.data.name ? this.data.name : ''
+  this.summary = this.data.summary ? this.data.summary : ''
+  this.content = this.data.content ? this.data.content : ''
+  // Other things filled later in loadAll
   this.actor = new Actor()
   this.to = []
   this.cc = []
   //
-  this.attachments = (raw_object.attachment && Array.isArray(raw_object.attachment)) ? raw_object.attachment : []
-}
-// Fetch function
-// Callback takes 3 parameters: load_ok, fetched_object, failure_message
-ASObject.fetch = function(url, token, callback) {
-  if (typeof url === 'object') {
-    // No need to fetch: already an object
-    const obj = new ASObject(url)
-    obj.load(token, function(load_ok, failure_message) {
-      if (load_ok) {
-        callback(true, obj, undefined)
-      } else {
-        callback(false, undefined, failure_message)
-      }
-    })
-  } else {
-    // Use ActivityPub protocol to get the object
-    // The id is the link to the object on the server
-    const request = new XMLHttpRequest()
-    request.onreadystatechange = function() {
-      if (request.readyState == 4 && request.status == 200) {
-        const answer = JSON.parse(request.responseText)
-        if (answer) {
-          const obj = new ASObject(answer)
-          obj.load(token, function(load_ok, failure_message) {
-            if (load_ok) {
-              callback(true, obj, undefined)
-            } else {
-              callback(false, undefined, 'Unable to retrieve actors of objects.')
-              console.log(answer)
-            }
-          })
-        } else {
-          callback(false, undefined, 'Unable to retrieve object.')
-          console.log(answer)
-        }
-      } else if (request.readyState == 4) {
-        callback(false, undefined, 'Error during retrieval of object.')
-      }
-    }
-    request.open('GET', url, true)
-    if (token) {
-      request.setRequestHeader('Authorization', 'Bearer ' + token)
-    }
-    request.setRequestHeader('Content-Type', 'application/activity+json')
-    request.setRequestHeader('Accept', 'application/activity+json')
-    request.send()
-  }
+  this.loaded = false
 }
 
-ASObject.prototype = {
-  // Load the actors present in the actor, to and cc fields
-  loadActors: function(token, callback) {
-    // Load the author
-    // Try: actor, then attributedTo
-    var profile = this.raw.actor
-    if (!profile) {
-      profile = this.raw.attributedTo
+ActivityObject.prototype = {
+  loadAll: function (callback) {
+    // Do not load if already loaded
+    if (this.loaded) {
+      callback(true, undefined)
+      return
     }
-    KnownActors.retrieve(
-      profile,
-      token,
-      function(load_ok, actor, failure_message) {
+    this.loaded = true
+    // Fetch attributes
+    this.data.fetchAttributeList(
+      ['attributedTo', 'attachment'],
+      this.token,
+      function (load_ok, failure_message) {
         if (load_ok) {
-          this.actor = actor
-        }
-        // Load the actors in the "to" array, skip to "cc" if there is no "to", and stop is there is no "cc" either
-        if (this.raw.to && Array.isArray(this.raw.to)) {
-          this.loadToActors(this.raw.to.values(), token, callback)
-        } else if (this.raw.to && typeof this.raw.to === 'string') {
-          // Only one element in the array
-          this.loadToActors([this.raw.to].values(), token, callback)
-        } else if (this.raw.cc && Array.isArray(this.raw.cc)) {
-          this.loadCcActors(this.raw.cc.values(), token, callback)
-        } else if (this.raw.cc && typeof this.raw.cc === 'string') {
-          // Only one element in the array
-          this.loadToActors([this.raw.cc].values(), token, callback)
-        } else {
+          // Actor
+          this.actor.loadFromASActor(this.data.attributedTo, function (ok, error) {
+            if (ok) {
+              // Store actors in KnownActors
+              KnownActors.set(this.actor.data.id, this.actor)
+            } else {
+              console.log(error)
+            }
+          }.bind(this))
+          // attachment
+          this.attachments = (this.data.attachment && Array.isArray(this.data.attachment)) ? this.data.attachment : []
+          // Audience
+          // to
+          this.loadAudience(this.data.to, this.to, function (load_ok, failure_message) {
+            if (!load_ok) {
+              console.log(failure_message)
+            }
+          })
+          // cc
+          this.loadAudience(this.data.cc, this.cc, function (load_ok, failure_message) {
+            if (!load_ok) {
+              console.log(failure_message)
+            }
+          })
+          // OK
           callback(true, undefined)
+        } else {
+          callback(false, failure_message)
         }
       }.bind(this))
   },
-  // Load the "To" array
-  loadToActors: function(iter, token, callback) {
-    const next = iter.next()
-    if (next.done) {
-      // Finished: load the "cc" array (if possible)
-      if (this.raw.cc && Array.isArray(this.raw.cc)) {
-        this.loadCcActors(this.raw.cc.values(), token, callback)
-      } else if (this.raw.cc && typeof this.raw.cc === 'string') {
-        // Only one element in the array
-        this.loadToActors([this.raw.cc].values(), token, callback)
-      } else {
-        callback(true, undefined)
-      }
+  // Load an audience array
+  loadAudience: function (from, to, callback) {
+    if (from && Array.isArray(from)) {
+      this.loadAudienceIter(from.values(), to, callback, '')
+    } else if (from && typeof from === 'string') {
+      // Only one element in array
+      this.loadAudienceIter([from].values(), to, callback, '')
     } else {
-      const profile = next.value
-      KnownActors.retrieve(
-        profile,
-        token,
-        function(load_ok, actor, failure_message) {
-          if (load_ok) {
-            this.to.push(actor)
-          } else {
-            // Collection ?
-          }
-          this.loadToActors(iter, token, callback)
-        }.bind(this))
-    }
-  },
-  // Load the "Cc" array
-  loadCcActors: function(iter, token, callback) {
-    const next = iter.next()
-    if (next.done) {
       callback(true, undefined)
-    } else {
-      const profile = next.value
-      KnownActors.retrieve(
-        profile,
-        token,
-        function(load_ok, actor, failure_message) {
-          if (load_ok) {
-            this.cc.push(actor)
-          } else {
-            // Collection ?
-          }
-          this.loadCcActors(iter, token, callback)
-        }.bind(this))
     }
   },
-  // Load everything
-  load: function(token, callback) {
-    this.loadActors(token, callback)
+  loadAudienceIter: function (iter, to, callback, error_msg) {
+    const next = iter.next()
+    if (next.done) {
+      callback(true, error_msg)
+    } else {
+      const act = next.value
+      var err = error_msg
+      if (typeof act === 'string') {
+        // string => id of actor
+        KnownActors.retrieve(act, undefined, function (load_ok, actor, failure_message) {
+          if (load_ok) {
+            to.push(actor)
+          } else {
+            err = err + failure_message + '<br/>'
+          }
+        })
+      } else if (typeof act === 'object') {
+        // Actor is present as object
+        const actor = new Actor()
+        actor.loadFromASActor(this.data.actor, function (load_ok, failure_message) {
+          if (load_ok) {
+            // Store actors in KnownActors
+            KnownActors.set(this.actor.data.id, this.actor)
+            to.push(actor)
+          } else {
+            err = err + failure_message + '<br/>'
+          }
+        }.bind(this))
+      }
+      this.loadAudienceIter(iter, to, callback, err)
+    }
   }
 }
 
 // Exported structures
-exports.ASObject = ASObject
+exports.ActivityObject = ActivityObject

@@ -1,8 +1,7 @@
 const {Actor} = require('./src/actor.js')
-const {Timeline} = require('./src/timeline.js')
+const {Timeline, KnownActivities} = require('./src/timeline.js')
 const {Message} = require('./src/message.js')
 const {ConnectedUser} = require('./src/connected-user.js')
-const {KnownActivities} = require('./src/known-activities.js')
 
 // For access of elements
 const Elem = function(id) {
@@ -67,10 +66,7 @@ const Render = {
       + '</a></p>'
     } else {
       display = display + '<img src="' + Icons.fallback['user'] + '" width="32" height="32" /> '
-      + '<p style="display:inline-block;">'
-      + '<a href="' + actor.data.id + '">'
-      + 'Other actor'
-      + '</a></p>'
+      + '<p style="display:inline-block;">Unknown actor</p>'
     }
     display = display + '</section>'
     return display
@@ -218,7 +214,7 @@ const UI = {
         function(element) {
           return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
         }).join('')
-      Elem('activity-code-source').innerText = JSON.stringify(activity.raw, null, 1)
+      Elem('activity-code-source').innerText = JSON.stringify(activity.data._raw, null, 1)
       // Object of activity
       if (activity.object) {
         Elem('activity-object').style.display = 'block'
@@ -236,7 +232,7 @@ const UI = {
           function(element) {
             return '<li class="actor-display">' + Render.audienceActor(element) + '</li>'
           }).join('')
-        Elem('activity-object-code-source').innerText = JSON.stringify(activity.object.raw, null, 1)
+        Elem('activity-object-code-source').innerText = JSON.stringify(activity.object.data._raw, null, 1)
         Elem('activity-object-name').innerText = activity.object.name
         Elem('activity-object-summary').innerHTML = activity.object.summary
         Elem('activity-object-content').innerHTML = activity.object.content
@@ -487,6 +483,14 @@ const UI = {
   },
   // Show contents of activities
   showActivity: function(activityId) {
-    UI.showPage('show-activity', KnownActivities.get(activityId))
+    const act = KnownActivities.get(activityId)
+    act.loadAll(function (load_ok, failure_message) {
+      if (load_ok) {
+        UI.showPage('show-activity', act)
+      }
+      if (failure_message) {
+        UI.displayError(failure_message)
+      }
+    })
   }
 }

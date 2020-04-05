@@ -1,8 +1,21 @@
+const {Fetcher} = require('./activity-vocabulary.js')
 const {Activity} = require('./activity.js')
-const {KnownActivities} = require('./known-activities.js')
+
+// Already fetched activities, as a map, in order to be able to fetch them by their id
+const KnownActivities = {
+  // Cache
+  activities: {},
+  // Methods
+  get: function(id) {
+    return KnownActivities.activities[id]
+  },
+  set: function(id, obj) {
+    KnownActivities.activities[id] = obj
+  }
+}
 
 // Timeline class
-// Represent a collection of activities
+// Represent a paginated collection of activities
 var Timeline = function() {}
 Timeline.prototype = {
   // attributes
@@ -14,84 +27,80 @@ Timeline.prototype = {
   next: undefined,
   // Token used when loading -- for loading prev/next within the same context
   token: undefined,
-  //
+  // Load a timeline from a url
   load: function(url, token, callback) {
     this.token = token
-    const request = new XMLHttpRequest()
-    request.onreadystatechange = function() {
-      if (request.readyState == 4 && request.status == 200) {
-        var answer = JSON.parse(request.responseText)
-        if (answer.type === 'OrderedCollection' && answer.first && typeof answer.first === 'string') {
-          // First is a link => load again with the first
-          this.load(answer.first, token, callback)
-        } else if (answer.type === 'OrderedCollection' && answer.first && answer.first.type === 'OrderedCollectionPage') {
-          this.activities = []
-          this.prev = answer.first.prev
-          this.next = answer.first.next
-          this.parseActivities(answer.first.orderedItems, token, callback)
-        } else if (answer.type === 'OrderedCollection' && answer.orderedItems) {
+    // A timeline must be reloaded each time
+    Fetcher.refresh(url, token, function(load_ok, fetched_timeline, failure_message) {
+      if (load_ok) {
+        if (fetched_timeline.type === 'OrderedCollection' && fetched_timeline.first) {
+          // Collection is paginated
+          // Fetch the attribute
+          fetched_timeline.fetchAttribute('first', token, function (ok, error) {
+            if (load_ok) {
+              this.activities = []
+              this.prev = fetched_timeline.prev
+              this.next = fetched_timeline.next
+              this.parsePage(fetched_timeline.first, token, callback)
+            } else {
+              callback(false, error)
+            }
+          }.bind(this))
+        } else if (fetched_timeline.type === 'OrderedCollection' && fetched_timeline.orderedItems) {
           // Collection is not paginated
           this.activities = []
-          this.prev = answer.prev
-          this.next = answer.next
-          this.parseActivities(answer.orderedItems, token, callback)
-        } else if (answer.type === 'OrderedCollectionPage') {
+          this.prev = fetched_timeline.prev
+          this.next = fetched_timeline.next
+          this.parsePage(fetched_timeline, token, callback)
+        } else if (fetched_timeline.type === 'OrderedCollectionPage') {
           this.activities = []
-          this.prev = answer.prev
-          this.next = answer.next
-          this.parseActivities(answer.orderedItems, token, callback)
+          this.prev = fetched_timeline.prev
+          this.next = fetched_timeline.next
+          this.parsePage(fetched_timeline, token, callback)
         } else {
           callback(false, 'Unexpected answer from server when fetching activity collection.')
           console.log(answer)
         }
-      } else if (request.readyState == 4) {
-        callback(false, 'Server error (' + request.status + ') when fetching activity collection.')
+      } else {
+        // Propagate error
+        callback(false, failure_message)
       }
-    }.bind(this)
-    request.open('GET', url, true)
-    if (token) {
-      request.setRequestHeader('Authorization', 'Bearer ' + token)
-    }
-    request.setRequestHeader('Content-Type', 'application/activity+json')
-    request.setRequestHeader('Accept', 'application/activity+json')
-    request.send()
+    }.bind(this))
   },
-  parseActivities: function(raw_activities, token, callback) {
-    // raw_activities must be an array
-    if (!Array.isArray(raw_activities)) {
-      console.log(raw_activities)
-      callback(false, 'Unexpected format for activity collection.')
-      return
-    }
-    // Get the next activity
-    const raw_act = raw_activities.shift()
-    if (raw_act && typeof raw_act === 'string') {
-      // link, and not the object itself => fetch the activity
-      KnownActivities.retrieve(raw_act, token, function(load_ok, activity, failure_message) {
-        if (load_ok) {
-          // Push to the list of activities
-          this.activities.push(activity)
-        }
-        this.parseActivities(raw_activities, token, callback)
-      }.bind(this))
-    } else if (raw_act) {
-      const act = new Activity(raw_act)
-      act.load(
-        token,
-        function(load_ok, failure_message) {
-          if (load_ok) {
-            // Push to the list of activities
-            this.activities.push(act)
-            // Add the activity to the known activities
-            KnownActivities.set(act.id, act)
-          }
-          this.parseActivities(raw_activities, token, callback)
-        }.bind(this))
+  parsePage: function (collectionPage, token, callback) {
+    // Fetch attributes of collectionPage
+    collectionPage.fetchAttribute('orderedItems', token, function (load_ok, failure_message) {
+      if (load_ok) {
+        // Elements of the page have been fetched
+        // For each, convert them to Activity and put them in this.activities
+        this.addActivity(collectionPage.orderedItems.values(), token, callback, '')
+      } else {
+        callback(false, failure_message)
+      }
+    }.bind(this))
+  },
+  addActivity: function (iter, token, callback, error_msg) {
+    const next = iter.next()
+    if (next.done) {
+      callback(true, error_msg === '' ? undefined : error_msg)
     } else {
-      callback(true, undefined)
+      var err = error_msg
+      const act = new Activity(next.value, token)
+      act.loadNeeded(function (load_ok, failure_message) {
+        if (!load_ok) {
+          err = err + failure_message + '<br/>'
+        }
+        // Whether it's ok or not, push
+        this.activities.push(act)
+        // Store in known activities
+        KnownActivities.set(act.id, act)
+        // next
+        this.addActivity(iter, token, callback, err)
+      }.bind(this))
     }
   }
 }
 
 // Exported structures
 exports.Timeline = Timeline
+exports.KnownActivities = KnownActivities

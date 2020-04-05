@@ -84,29 +84,34 @@ Actor.prototype = {
     // Fetch the activity actor
     Fetcher.get(profile_url, undefined, function(load_ok, fetched_actor, failure_message) {
       if (load_ok) {
-        this.data = fetched_actor
-        // Fetch a few properties
-        this.data.fetchAttributeList(
-          ['preferredUsername', 'name', 'summary', 'icon', 'endpoints'],
-          undefined,
-          function (ok, error) {
-            if (ok) {
-              if (!this.name) {
-                this.name = this.data.preferredUsername
-              }
-              if (!this.server) {
-                this.server = profile_url.replace('http://', '').replace('https://', '').split(/[/?#]/)[0]
-              }
-              this.valid = true
-              callback(true, undefined)
-            } else {
-              callback(false, error)
-            }
-          }.bind(this))
+        this.loadFromASActor(fetched_actor, callback)
       } else {
         callback(false, failure_message)
       }
     }.bind(this))
+  },
+  // Load from an ASActor
+  loadFromASActor: function(as_actor, callback) {
+    // Store the actor
+    this.data = as_actor
+    // Fetch a few properties
+    this.data.fetchAttributeList(
+      ['preferredUsername', 'name', 'summary', 'icon', 'endpoints'],
+      undefined,
+      function (ok, error) {
+        if (ok) {
+          if (!this.name) {
+            this.name = this.data.preferredUsername
+          }
+          if (!this.server) {
+            this.server = this.data.id.replace('http://', '').replace('https://', '').split(/[/?#]/)[0]
+          }
+          this.valid = true
+          callback(true, undefined)
+        } else {
+          callback(false, error)
+        }
+      }.bind(this))
   },
   // Fill the values of actor from fixed data
   // Usefull for displaying non-actors appearing in audience fields

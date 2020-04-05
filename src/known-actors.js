@@ -11,7 +11,7 @@ const KnownActors = {
   set: function(profile, actor) {
     KnownActors.actors[profile] = actor
     // Make a false actor for followers
-    if (actor.data.followers) {
+    if (actor && actor.data && actor.data.followers) {
       const followers = new Actor()
       followers.fromDummyData(actor.address(), 'followers', 'Followers of ' + actor.displayName(), actor.data.followers)
       KnownActors.actors[actor.data.followers] = followers;
