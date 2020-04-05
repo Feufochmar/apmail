@@ -473,13 +473,27 @@ Object.assign(ASCollection.prototype,
     // Array of properties that may need to be fetched
     // This array should be overwritten when inheriting prototypes (by completing it)
     _mayNeedFetch: ASObject.prototype._mayNeedFetch.concat([
-      'current', 'first', 'last', 'items',
+      'current', 'first', 'last', 'items'
     ]),
   })
 ASCollection.prototype.constructor = ASCollection
 
 // ASOrderedCollection prototype
 ASOrderedCollection.prototype = Object.create(ASCollection.prototype)
+Object.assign(ASOrderedCollection.prototype,
+  {
+    // Attributes
+    orderedItems: undefined, // Shouldn't be needed, as it has the same meaning as 'items' of ASCollection, but present in implementations
+    // Array of properties that do not need to be fetched
+    // This array should be overwritten when inheriting prototypes (by completing it)
+    _alwaysAvailable: ASCollection.prototype._alwaysAvailable.concat([
+    ]),
+    // Array of properties that may need to be fetched
+    // This array should be overwritten when inheriting prototypes (by completing it)
+    _mayNeedFetch: ASCollection.prototype._mayNeedFetch.concat([
+      'orderedItems',
+    ]),
+  })
 ASOrderedCollection.prototype.constructor = ASOrderedCollection
 
 // ASCollectionPage prototype
@@ -504,22 +518,25 @@ ASCollectionPage.prototype.constructor = ASCollectionPage
 
 // ASOrderedCollectionPage prototype
 // Specification says that it inherits from both ASCollectionPage and ASOrderedCollection,
-// but ASOrderedCollection does not defines more fields than ASCollection,
-// so we only inherit from ASCollectionPage, which already inherits from ASCollection
 ASOrderedCollectionPage.prototype = Object.create(ASCollectionPage.prototype)
+Object.assign(ASOrderedCollectionPage.prototype, ASOrderedCollection.prototype)
+// Helping function for removing duplicates
+unique = function(arr) {
+  return arr.filter(function (elem, idx) { return idx === arr.indexOf(elem) })
+}
 Object.assign(ASOrderedCollectionPage.prototype,
   {
     // Attributes
     startIndex: undefined,
     // Array of properties that do not need to be fetched
     // This array should be overwritten when inheriting prototypes (by completing it)
-    _alwaysAvailable: ASCollectionPage.prototype._alwaysAvailable.concat([
+    _alwaysAvailable: unique(ASOrderedCollection.prototype._alwaysAvailable.concat(ASCollectionPage.prototype._alwaysAvailable.concat([
       'startIndex',
-    ]),
+    ]))),
     // Array of properties that may need to be fetched
     // This array should be overwritten when inheriting prototypes (by completing it)
-    _mayNeedFetch: ASCollectionPage.prototype._mayNeedFetch.concat([
-    ]),
+    _mayNeedFetch: unique(ASOrderedCollection.prototype._mayNeedFetch.concat(ASCollectionPage.prototype._mayNeedFetch.concat([
+    ]))),
   })
 ASOrderedCollectionPage.prototype.constructor = ASOrderedCollectionPage
 
