@@ -254,6 +254,13 @@ ASBase.prototype = {
   // Callback signature is function(load_ok, failure_message)
   // Note: done this way to avoid fetching all resources in fromJson, but only when they are needed
   fetchAttribute: function(attribute_name, callback) {
+    this._fetchAttribute(attribute_name, Fetcher.get, callback)
+  },
+  refreshAttribute: function(attribute_name, callback) {
+    this._fetchAttribute(attribute_name, Fetcher.refresh, callback)
+  },
+  // Private method, with fetcher function to call
+  _fetchAttribute: function(attribute_name, fetch_func, callback) {
     const attribute_value = this[attribute_name]
     if (this._alwaysAvailable.includes(attribute_name)) {
       // Those attributes are always available in a usable format, no need to fetch
@@ -266,7 +273,7 @@ ASBase.prototype = {
       callback(true, undefined)
     } else if (Array.isArray(attribute_value)) {
       // Attribute is an array of elements. Each element should be converted.
-      this._fetchAndConvertAllAttributeValue(attribute_value.values(), function(load_ok, fetched_value, failure_message) {
+      this._fetchAndConvertAllAttributeValue(attribute_value.values(), fetch_func, function(load_ok, fetched_value, failure_message) {
         // Update value of attribute
         this[attribute_name] = fetched_value
         callback(load_ok, failure_message)
@@ -276,7 +283,7 @@ ASBase.prototype = {
       callback(true, undefined)
     } else {
       // Convertion needed
-      this._fetchAndConvertAttributeValue(attribute_value, function(load_ok, fetched_value, failure_message) {
+      this._fetchAndConvertAttributeValue(attribute_value, fetch_func, function(load_ok, fetched_value, failure_message) {
         // Update value of attribute
         this[attribute_name] = fetched_value
         callback(load_ok, failure_message)
@@ -285,12 +292,12 @@ ASBase.prototype = {
   },
   // Fetch all elements of an array iterator to populate a result array
   // Callback signature is function(load_ok, fetched_value, failure_message)
-  _fetchAndConvertAllAttributeValue: function(iter, callback, ret_value, previous_errors) {
+  _fetchAndConvertAllAttributeValue: function(iter, fetch_func, callback, ret_value, previous_errors) {
     const next = iter.next()
     if (next.done) {
       callback(true, ret_value, (previous_errors === '') ? undefined : previous_errors)
     } else {
-      this._fetchAndConvertAttributeValue(next.value, function(load_ok, fetched_value, failure_message) {
+      this._fetchAndConvertAttributeValue(next.value, fetch_func, function(load_ok, fetched_value, failure_message) {
         var values = ret_value ? ret_value : []
         const msg_errors = (previous_errors ? previous_errors : '') + (load_ok ? '' : '<br/>' + failure_message)
         if (load_ok) {
@@ -300,13 +307,13 @@ ASBase.prototype = {
           console.log(failure_message)
         }
         // Next
-        this._fetchAndConvertAllAttributeValue(iter, callback, values, msg_errors)
+        this._fetchAndConvertAllAttributeValue(iter, fetch_func, callback, values, msg_errors)
       }.bind(this))
     }
   },
   // Fetch an attribute value
   // Callback signature is function(load_ok, fetched_value, failure_message)
-  _fetchAndConvertAttributeValue: function(attribute_value, callback) {
+  _fetchAndConvertAttributeValue: function(attribute_value, fetch_func, callback) {
     if ((attribute_value === undefined) || (attribute_value === null)) {
       // attribute is not present, return it as is
       callback(true, attribute_value, undefined)
@@ -316,7 +323,7 @@ ASBase.prototype = {
       callback(true, Fetcher.fromJson(attribute_value), undefined)
     } else if (typeof attribute_value === 'string') {
       // Link => fetch value
-      Fetcher.get(attribute_value, function(load_ok, obj, failure_message) {
+      fetch_func(attribute_value, function(load_ok, obj, failure_message) {
         if (load_ok) {
           callback(true, obj, undefined)
         } else {
@@ -332,22 +339,28 @@ ASBase.prototype = {
   // Fetch several attributes at the same time
   // Callback signature is function(load_ok, failure_message)
   fetchAttributeList: function (attribute_lst, callback) {
-    this._fetchAttributeListIter(attribute_lst.values(), callback, undefined)
+    this._fetchAttributeList(attribute_lst, Fetcher.get, callback)
+  },
+  refreshAttributeList: function (attribute_lst, callback) {
+    this._fetchAttributeList(attribute_lst, Fetcher.refresh, callback)
+  },
+  _fetchAttributeList: function (attribute_lst, fetch_func, callback) {
+    this._fetchAttributeListIter(attribute_lst.values(), fetch_func, callback, undefined)
   },
   //
-  _fetchAttributeListIter: function (attribute_lst, callback, previous_errors) {
+  _fetchAttributeListIter: function (attribute_lst, fetch_func, callback, previous_errors) {
     const next = attribute_lst.next()
     if (next.done) {
       callback(true, (previous_errors === '') ? undefined : previous_errors)
     } else {
-      this.fetchAttribute(next.value, function(load_ok, failure_message) {
+      this._fetchAttribute(next.value, fetch_func, function(load_ok, failure_message) {
         const msg_errors = (previous_errors ? previous_errors : '') + (load_ok ? '' : '<br/>' + failure_message)
         if (!load_ok) {
           // Don't stop at first error, but cumulate error messages
           console.log(failure_message)
         }
         // Next
-        this._fetchAttributeListIter(attribute_lst, callback, msg_errors)
+        this._fetchAttributeListIter(attribute_lst, fetch_func, callback, msg_errors)
       }.bind(this))
     }
   }

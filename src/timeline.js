@@ -33,7 +33,7 @@ Timeline.prototype = {
         if (fetched_timeline.type === 'OrderedCollection' && fetched_timeline.first) {
           // Collection is paginated
           // Fetch the attribute
-          fetched_timeline.fetchAttribute('first', function (ok, error) {
+          fetched_timeline.refreshAttribute('first', function (ok, error) {
             if (load_ok) {
               this.activities = []
               this.prev = fetched_timeline.prev
@@ -66,7 +66,7 @@ Timeline.prototype = {
   },
   parsePage: function (collectionPage, callback) {
     // Fetch attributes of collectionPage
-    collectionPage.fetchAttribute('orderedItems', function (load_ok, failure_message) {
+    collectionPage.refreshAttribute('orderedItems', function (load_ok, failure_message) {
       if (load_ok) {
         // Elements of the page have been fetched
         // For each, convert them to Activity and put them in this.activities
