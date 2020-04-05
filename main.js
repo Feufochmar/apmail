@@ -7,7 +7,8 @@ function createWindow () {
     height: 768,
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    icon: __dirname + '/img/APMail.png'
   })
 
   // and load the index.html of the app.
