@@ -428,7 +428,7 @@ const UI = {
   addCcRecipient: function() {
     const actor = new Actor()
     actor.loadFromNameServerAddress(
-      Elem('send-message-to-recipient').value,
+      Elem('send-message-cc-recipient').value,
       function(load_ok, failure_message) {
         if (load_ok) {
           UI.composed_message.addCcRecipient(actor)
@@ -441,16 +441,14 @@ const UI = {
   // Remove from To
   removeToRecipient: function(url_profile) {
     // Don't fetch the actor, only set the profile url used in removal
-    const actor = new Actor()
-    actor.data.id = url_profile
+    const actor = {data: {id: url_profile}}
     UI.composed_message.removeToRecipient(actor)
     UI.showPage('send-message', undefined)
   },
   // Remove from Cc
   removeCcRecipient: function(url_profile) {
     // Don't fetch the actor, only set the profile url used in removal
-    const actor = new Actor()
-    actor.data.id = url_profile
+    const actor = {data: {id: url_profile}}
     UI.composed_message.removeCcRecipient(actor)
     UI.showPage('send-message', undefined)
   },
@@ -463,6 +461,8 @@ const UI = {
     UI.composed_message.send(
       function(is_ok, failure_message) {
         if (is_ok) {
+          // Clear message
+          UI.composed_message = new Message()
           UI.showPage('send-message', undefined)
         } else {
           UI.displayError('Error when sending message: ' + failure_message)

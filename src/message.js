@@ -34,13 +34,13 @@ Message.prototype = {
   },
   // Remove recipients
   removeToRecipient: function(actor) {
-    var idx = this.to.findIndex(x => x.urls.profile === actor.urls.profile)
+    var idx = this.to.findIndex(x => x.data.id === actor.data.id)
     if (idx !== -1) {
       this.to.splice(idx, 1)
     }
   },
   removeCcRecipient: function(actor) {
-    var idx = this.cc.findIndex(x => x.urls.profile === actor.urls.profile)
+    var idx = this.cc.findIndex(x => x.data.id === actor.data.id)
     if (idx !== -1) {
       this.cc.splice(idx, 1)
     }
@@ -48,17 +48,17 @@ Message.prototype = {
   // Send message
   send: function(callback) {
     // Recipients
-    var recipients_to = this.to.map(x => x.urls.profile)
-    var recipients_cc = this.cc.map(x => x.urls.profile)
+    var recipients_to = this.to.map(x => x.data.id)
+    var recipients_cc = this.cc.map(x => x.data.id)
     if (this.public_visibility === 'to') {
       recipients_to.push('https://www.w3.org/ns/activitystreams#Public')
     } else if (this.public_visibility === 'cc') {
       recipients_cc.push('https://www.w3.org/ns/activitystreams#Public')
     }
     if (this.follower_visibility === 'to') {
-      recipients_to.push(ConnectedUser.actor.urls.followers)
+      recipients_to.push(ConnectedUser.actor.data.followers)
     } else if (this.follower_visibility === 'cc') {
-      recipients_cc.push(ConnectedUser.actor.urls.followers)
+      recipients_cc.push(ConnectedUser.actor.data.followers)
     }
     //
     var message = {
@@ -87,7 +87,7 @@ Message.prototype = {
         callback(false, 'Send: Message not created on server')
       }
     }
-    request.open('POST', ConnectedUser.actor.urls.outbox, true)
+    request.open('POST', ConnectedUser.actor.data.outbox, true)
     request.setRequestHeader('Authorization', 'Bearer ' + ConnectedUser.tokens.user.access_token)
     request.setRequestHeader('Content-Type', 'application/activity+json')
     request.setRequestHeader('Accept', 'application/activity+json')
