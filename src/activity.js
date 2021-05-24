@@ -1,6 +1,6 @@
-const {Actor} = require('./actor.js')
-const {KnownActors} = require('./known-actors.js')
-const {ActivityObject} = require('./activity-object.js')
+import {Actor} from './actor.js'
+import {KnownActors} from './known-actors.js'
+import {ActivityObject} from './activity-object.js'
 
 // Activity class
 const Activity = function (as_activity) {
@@ -127,4 +127,4 @@ Activity.prototype = {
 }
 
 // Exported structures
-exports.Activity = Activity
+export {Activity}

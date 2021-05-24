@@ -1,7 +1,7 @@
-const {Actor} = require('./src/actor.js')
-const {Timeline, KnownActivities} = require('./src/timeline.js')
-const {Message} = require('./src/message.js')
-const {ConnectedUser} = require('./src/connected-user.js')
+import {Actor} from './src/actor.js'
+import {Timeline, KnownActivities} from './src/timeline.js'
+import {Message} from './src/message.js'
+import {ConnectedUser} from './src/connected-user.js'
 
 // For access of elements
 const Elem = function(id) {
@@ -493,3 +493,5 @@ const UI = {
     })
   }
 }
+
+export {UI}

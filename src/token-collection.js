@@ -1,5 +1,5 @@
 // A small object for getting the token when talking to a server
-TokenCollection = {
+const TokenCollection = {
   tokens: {},
   set: function (server, token) {
     TokenCollection.tokens[server] = token
@@ -11,4 +11,4 @@ TokenCollection = {
 }
 
 // Exported structures
-exports.TokenCollection = TokenCollection
+export {TokenCollection}

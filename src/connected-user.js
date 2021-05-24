@@ -1,5 +1,5 @@
-const {TokenCollection} = require('./token-collection.js')
-const {Actor} = require('./actor.js')
+import {TokenCollection} from './token-collection.js'
+import {Actor} from './actor.js'
 
 // Connected user structure
 const ConnectedUser = {
@@ -149,4 +149,4 @@ const ConnectedUser = {
 }
 
 // Exported structures
-exports.ConnectedUser = ConnectedUser
+export {ConnectedUser}

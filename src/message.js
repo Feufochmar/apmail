@@ -1,4 +1,4 @@
-const {ConnectedUser} = require('./connected-user.js')
+import {ConnectedUser} from './connected-user.js'
 
 // Outgoing messages
 var Message = function() {
@@ -96,4 +96,4 @@ Message.prototype = {
 }
 
 // Exported structures
-exports.Message = Message
+export {Message}

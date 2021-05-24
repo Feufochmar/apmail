@@ -1,5 +1,5 @@
-const {Fetcher} = require('./activity-vocabulary.js')
-const {Activity} = require('./activity.js')
+import {Fetcher} from './activity-vocabulary.js'
+import {Activity} from './activity.js'
 
 // Already fetched activities, as a map, in order to be able to fetch them by their id
 const KnownActivities = {
@@ -35,9 +35,6 @@ Timeline.prototype = {
           // Fetch the attribute
           fetched_timeline.refreshAttribute('first', function (ok, error) {
             if (load_ok) {
-              this.activities = []
-              this.prev = fetched_timeline.prev
-              this.next = fetched_timeline.next
               this.parsePage(fetched_timeline.first, callback)
             } else {
               callback(false, error)
@@ -45,14 +42,8 @@ Timeline.prototype = {
           }.bind(this))
         } else if (fetched_timeline.type === 'OrderedCollection' && fetched_timeline.orderedItems) {
           // Collection is not paginated
-          this.activities = []
-          this.prev = fetched_timeline.prev
-          this.next = fetched_timeline.next
           this.parsePage(fetched_timeline, callback)
         } else if (fetched_timeline.type === 'OrderedCollectionPage') {
-          this.activities = []
-          this.prev = fetched_timeline.prev
-          this.next = fetched_timeline.next
           this.parsePage(fetched_timeline, callback)
         } else {
           callback(false, 'Unexpected answer from server when fetching activity collection.')
@@ -65,12 +56,18 @@ Timeline.prototype = {
     }.bind(this))
   },
   parsePage: function (collectionPage, callback) {
+    // Set the values
+    this.activities = []
+    this.prev = collectionPage.prev
+    this.next = collectionPage.next
     // Fetch attributes of collectionPage
     collectionPage.refreshAttribute('orderedItems', function (load_ok, failure_message) {
-      if (load_ok) {
+      if (load_ok && collectionPage.orderedItems) {
         // Elements of the page have been fetched
         // For each, convert them to Activity and put them in this.activities
         this.addActivity(collectionPage.orderedItems.values(), callback, '')
+      } else if (load_ok) {
+        callback(false, 'No item in activity collection.')
       } else {
         callback(false, failure_message)
       }
@@ -99,5 +96,4 @@ Timeline.prototype = {
 }
 
 // Exported structures
-exports.Timeline = Timeline
-exports.KnownActivities = KnownActivities
+export {Timeline, KnownActivities}

@@ -6,8 +6,6 @@ function createWindow () {
     width: 1024,
     height: 768,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
     },
     icon: __dirname + '/img/APMail.png'
   })

@@ -1,4 +1,4 @@
-const {Fetcher, ASActor} = require('./activity-vocabulary.js')
+import {Fetcher, ASActor} from './activity-vocabulary.js'
 
 // Actor class
 // Add additional services around an ASActor
@@ -125,4 +125,4 @@ Actor.prototype = {
 }
 
 // Exported structures
-exports.Actor = Actor
+export {Actor}

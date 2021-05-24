@@ -5,7 +5,10 @@
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     <link href="apmail.css" rel="stylesheet" type="text/css" media="all" />
-    <script src="render.js"></script>
+    <script type="module">
+    import {UI} from './render.js'
+    window.UI = UI
+    </script>
   </head>
   <body onload="UI.checkConnection();">
     <!-- Navigation column -->

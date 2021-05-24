@@ -1,5 +1,5 @@
-const {Actor} = require('./actor.js')
-const {KnownActors} = require('./known-actors.js')
+import {Actor} from './actor.js'
+import {KnownActors} from './known-actors.js'
 
 // ActivityObject class: wrapper around an Object of the ActivityStream spec
 const ActivityObject = function(as_object) {
@@ -109,4 +109,4 @@ ActivityObject.prototype = {
 }
 
 // Exported structures
-exports.ActivityObject = ActivityObject
+export {ActivityObject}

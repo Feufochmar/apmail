@@ -74,8 +74,8 @@ const ASMention = function() {}
 
 // Object fetcher
 // Convert resources from the resource fetcher into Activity objects
-const {TokenCollection} = require('./token-collection.js')
-Fetcher = {
+import {TokenCollection} from './token-collection.js'
+const Fetcher = {
   // Cache of already accessed objects
   knownObjects: {},
   // Get an object
@@ -536,7 +536,7 @@ ASCollectionPage.prototype.constructor = ASCollectionPage
 ASOrderedCollectionPage.prototype = Object.create(ASCollectionPage.prototype)
 Object.assign(ASOrderedCollectionPage.prototype, ASOrderedCollection.prototype)
 // Helping function for removing duplicates
-unique = function(arr) {
+const unique = function(arr) {
   return arr.filter(function (elem, idx) { return idx === arr.indexOf(elem) })
 }
 Object.assign(ASOrderedCollectionPage.prototype,
@@ -857,63 +857,65 @@ ASMention.prototype.constructor = ASMention
 
 ////
 // Exported structures
+export {
 // Fetcher
-exports.Fetcher = Fetcher
+Fetcher,
 // Core types
-exports.ASObject = ASObject
-exports.ASLink = ASLink
-exports.ASActivity = ASActivity
-exports.ASIntransitiveActivity = ASIntransitiveActivity
-exports.ASCollection = ASCollection
-exports.ASOrderedCollection = ASOrderedCollection
-exports.ASCollectionPage = ASCollectionPage
-exports.ASOrderedCollectionPage = ASOrderedCollectionPage
-exports.ASActor = ASActor
+ASObject,
+ASLink,
+ASActivity,
+ASIntransitiveActivity,
+ASCollection,
+ASOrderedCollection,
+ASCollectionPage,
+ASOrderedCollectionPage,
+ASActor,
 // Activity types
-exports.ASAccept = ASAccept
-exports.ASAdd = ASAdd
-exports.ASAnnounce = ASAnnounce
-exports.ASArrive = ASArrive
-exports.ASBlock = ASBlock
-exports.ASCreate = ASCreate
-exports.ASDelete = ASDelete
-exports.ASDislike = ASDislike
-exports.ASFlag = ASFlag
-exports.ASFollow = ASFollow
-exports.ASIgnore = ASIgnore
-exports.ASInvite = ASInvite
-exports.ASJoin = ASJoin
-exports.ASLeave = ASLeave
-exports.ASLike = ASLike
-exports.ASListen = ASListen
-exports.ASMove = ASMove
-exports.ASOffer = ASOffer
-exports.ASQuestion = ASQuestion
-exports.ASReject = ASReject
-exports.ASRead = ASRead
-exports.ASRemove = ASRemove
-exports.ASTentativeReject = ASTentativeReject
-exports.ASTentativeAccept = ASTentativeAccept
-exports.ASTravel = ASTravel
-exports.ASUpdate = ASUpdate
-exports.ASView = ASView
+ASAccept,
+ASAdd,
+ASAnnounce,
+ASArrive,
+ASBlock,
+ASCreate,
+ASDelete,
+ASDislike,
+ASFlag,
+ASFollow,
+ASIgnore,
+ASInvite,
+ASJoin,
+ASLeave,
+ASLike,
+ASListen,
+ASMove,
+ASOffer,
+ASQuestion,
+ASReject,
+ASRead,
+ASRemove,
+ASTentativeReject,
+ASTentativeAccept,
+ASTravel,
+ASUpdate,
+ASView,
 // Actor types
-exports.ASApplication = ASApplication
-exports.ASGroup = ASGroup
-exports.ASOrganization = ASOrganization
-exports.ASPerson = ASPerson
-exports.ASService = ASService
+ASApplication,
+ASGroup,
+ASOrganization,
+ASPerson,
+ASService,
 // Object types
-exports.ASArticle = ASArticle
-exports.ASAudio = ASAudio
-exports.ASDocument = ASDocument
-exports.ASImage = ASImage
-exports.ASNote = ASNote
-exports.ASPage = ASPage
-exports.ASPlace = ASPlace
-exports.ASProfile = ASProfile
-exports.ASRelationship = ASRelationship
-exports.ASTombstone = ASTombstone
-exports.ASVideo = ASVideo
+ASArticle,
+ASAudio,
+ASDocument,
+ASImage,
+ASNote,
+ASPage,
+ASPlace,
+ASProfile,
+ASRelationship,
+ASTombstone,
+ASVideo,
 // Link types
-exports.ASMention = ASMention
+ASMention,
+}

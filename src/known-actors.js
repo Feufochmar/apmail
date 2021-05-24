@@ -1,4 +1,4 @@
-const {Actor} = require('./actor.js')
+import {Actor} from './actor.js'
 
 // A cache for actors, to avoid loading same actors several times when loading timelines
 const KnownActors = {
@@ -40,4 +40,4 @@ publicActor.fromDummyData('', 'public', 'Anyone', 'https://www.w3.org/ns/activit
 KnownActors.set(publicActor.data.id, publicActor)
 
 // Exported structures
-exports.KnownActors = KnownActors
+export {KnownActors}
